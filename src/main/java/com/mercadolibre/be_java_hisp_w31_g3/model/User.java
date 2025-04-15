@@ -13,7 +13,6 @@ import java.util.List;
 public class User {
     private Long userId;
     private String userName;
-    //private static Long counter;
     List<User> followed = new ArrayList<>();
     List<User> followers = new ArrayList<>();
 
@@ -25,9 +24,4 @@ public class User {
         this.followers = new ArrayList<>();
     }
 
-    //public User(String userName) {
-    //    this.userName = userName;
-    //    counter += 1;
-    //    this.userId = counter;
-    //}
 }

@@ -1,7 +1,5 @@
 package com.mercadolibre.be_java_hisp_w31_g3.repository;
 
-import com.mercadolibre.be_java_hisp_w31_g3.model.Buyer;
-import com.mercadolibre.be_java_hisp_w31_g3.model.Seller;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

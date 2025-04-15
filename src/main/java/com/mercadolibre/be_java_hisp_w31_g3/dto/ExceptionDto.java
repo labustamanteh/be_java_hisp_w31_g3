@@ -4,11 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class BuyerDto extends UserDto{
-    List<Seller> sellerList;
+@NoArgsConstructor
+@Data
+public class ExceptionDto {
+    private String message;
 }
