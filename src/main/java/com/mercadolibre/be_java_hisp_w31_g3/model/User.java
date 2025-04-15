@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 public class User {
     private Long userId;
     private String userName;
@@ -17,11 +16,11 @@ public class User {
     List<User> followers = new ArrayList<>();
 
 
-    public User(Long userId, String userName) {
-        this.userId = userId;
-        this.userName = userName;
-        this.followed = new ArrayList<>();
-        this.followers = new ArrayList<>();
-    }
+    //public User(Long userId, String userName) {
+    //    this.userId = userId;
+    //    this.userName = userName;
+    //    this.followed = new ArrayList<>();
+    //    this.followers = new ArrayList<>();
+    //}
 
 }
