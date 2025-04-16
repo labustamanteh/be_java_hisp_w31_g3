@@ -9,8 +9,13 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class User {
+    private static Long generatedId;
     private Long userId;
     private String userName;
     private List<User> followers = new ArrayList<>();
     private List<User> followed = new ArrayList<>();
+
+    public User(){
+        this.userId = ++generatedId;
+    }
 }

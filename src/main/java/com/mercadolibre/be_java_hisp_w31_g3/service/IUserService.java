@@ -1,7 +1,15 @@
 package com.mercadolibre.be_java_hisp_w31_g3.service;
 
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
+    
+import com.mercadolibre.be_java_hisp_w31_g3.dto.FollowersCountDto;
+
+
+import java.util.List;
 
 public interface IUserService {
+    List<UserDto> getUsers();
+    void addFollower(Long userId, Long userToFollow);
+    FollowersCountDto getfollowersCount(Long userId);
     UserDto getFollowersById(Long id, String order);
 }
