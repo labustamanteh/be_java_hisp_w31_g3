@@ -2,9 +2,7 @@ package com.mercadolibre.be_java_hisp_w31_g3.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mercadolibre.be_java_hisp_w31_g3.dto.FollowersCountDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
-import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
@@ -16,6 +14,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,32 +49,39 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("Un usuario no puede seguirse a sí mismo.");
         }
 
-        User userFollower = userRepository.getById(userId);
-        User userFollowed = userRepository.getById(userToFollow);
+        Optional<User> userFollower = userRepository.getById(userId);
+        Optional<User> userFollowed = userRepository.getById(userToFollow);
 
-        if (userFollower == null || userFollowed == null) {
+        if (userFollower.isEmpty() || userFollowed.isEmpty()) {
             throw new NotFoundException("Alguno de los usuarios no existe.");
         }
-        userFollowed.getFollowers().add(userFollower);
+
+        userRepository.addFollower(userId, userToFollow);
     }
 
     @Override
-    public FollowersCountDto getfollowersCount(Long userId) {
-        if (!userRepository.existsById(userId)) {
+    public UserDto getFollowersCount(Long userId) {
+        Optional<User> optionalUser = userRepository.getById(userId);
+        if (optionalUser.isEmpty()) {
             throw new NotFoundException("No se encontró el usuario con el id ingresado");
         }
-        User userFind = userRepository.getById(userId);
-        Long followersCount = Long.valueOf(userFind.getFollowers().size());
-        return new FollowersCountDto(userId, userFind.getUserName(), followersCount);
+        User user = optionalUser.get();
+        Long followersCount = (long) user.getFollowers().size();
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .followersCount(followersCount)
+                .build();
     }
 
     @Override
     public UserDto getFollowersById(Long id, String order) {
-        if (!userRepository.existsById(id)) {
+        Optional<User> optionalUser = userRepository.getById(id);
+        if (optionalUser.isEmpty()) {
             throw new NotFoundException("No existe el usuario con el id ingresado");
         }
 
-        User user = userRepository.getById(id);
+        User user = optionalUser.get();
 
         List<User> orderedFollowers = getUserListOrderedByName(order, user.getFollowers());
         List<UserDto> orderedFollowersDtos = orderedFollowers.stream().map(

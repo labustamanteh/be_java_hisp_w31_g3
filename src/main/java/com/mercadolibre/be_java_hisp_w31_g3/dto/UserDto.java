@@ -17,11 +17,11 @@ public class UserDto {
     @Builder.Default
     private List<UserDto> followed = null;
     @Builder.Default
-    private Integer followersCount = null;
+    private Long followersCount = null;
 
     public UserDto(){}
 
-    public UserDto(Long userId, String userName, List<UserDto> followers, List<UserDto> followed, Integer followersCount) {
+    public UserDto(Long userId, String userName, List<UserDto> followers, List<UserDto> followed, Long followersCount) {
         this.userId = userId;
         this.userName = userName;
         this.followers = followers;

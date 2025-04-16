@@ -1,6 +1,5 @@
 package com.mercadolibre.be_java_hisp_w31_g3.controller;
 
-import com.mercadolibre.be_java_hisp_w31_g3.dto.FollowersCountDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.service.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +22,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/followers/count")
-    public ResponseEntity<FollowersCountDto> getFollowersCount(@PathVariable Long userId) {
-        return new ResponseEntity<>(userService.getfollowersCount(userId), HttpStatus.OK);
+    public ResponseEntity<UserDto> getFollowersCount(@PathVariable Long userId) {
+        return new ResponseEntity<>(userService.getFollowersCount(userId), HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/follow/{userIdToFollow}")
