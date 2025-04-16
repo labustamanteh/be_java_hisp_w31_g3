@@ -23,8 +23,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/followers/count")
-    public ResponseEntity<FollowersCountDto> getFollowersCount(@PathVariable Long userId) {
-        return new ResponseEntity<>(userService.getfollowersCount(userId), HttpStatus.OK);
+    public ResponseEntity<UserDto> getFollowersCount(@PathVariable Long userId) {
+        return new ResponseEntity<>(userService.getFollowersCount(userId), HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/follow/{userIdToFollow}")

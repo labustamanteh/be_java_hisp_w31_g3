@@ -60,13 +60,17 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public FollowersCountDto getfollowersCount(Long userId) {
+    public UserDto getFollowersCount(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("No se encontró el usuario con el id ingresado");
         }
-        User userFind = userRepository.getById(userId);
-        Long followersCount = Long.valueOf(userFind.getFollowers().size());
-        return new FollowersCountDto(userId, userFind.getUserName(), followersCount);
+        User user = userRepository.getById(userId);
+        Long followersCount = Long.valueOf(user.getFollowers().size());
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .followersCount(followersCount)
+                .build();
     }
 
     @Override

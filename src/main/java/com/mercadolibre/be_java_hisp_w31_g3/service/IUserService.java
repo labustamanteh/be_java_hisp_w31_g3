@@ -9,6 +9,6 @@ import java.util.List;
 public interface IUserService {
     List<UserDto> getUsers();
     void addFollower(Long userId, Long userToFollow);
-    FollowersCountDto getfollowersCount(Long userId);
+    UserDto getFollowersCount(Long userId);
     UserDto getFollowersById(Long id, String order);
 }
