@@ -1,5 +1,6 @@
 package com.mercadolibre.be_java_hisp_w31_g3.model;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,8 +13,8 @@ public class User {
     private static Long generatedId = 0L;
     private Long userId;
     private String userName;
-    private List<User> followed = new ArrayList<>();
     private List<User> followers = new ArrayList<>();
+    private List<User> followed = new ArrayList<>();
 
     public User(){
         this.userId = ++generatedId;

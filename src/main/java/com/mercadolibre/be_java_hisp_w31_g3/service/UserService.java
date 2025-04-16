@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.FollowersCountDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
+import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
@@ -12,6 +13,7 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -32,17 +34,17 @@ public class UserService implements IUserService {
     public List<UserDto> getUsers() {
         List<User> userList = userRepository.getAll();
         if(userList.isEmpty()){
-            throw new NotFoundException("No existen los usuarios");
+            throw new NotFoundException("No hay usuarios para mostrar");
         }
         return userList.stream()
-                .map(v -> mapper.convertValue(v,UserDto.class))
+                .map(user -> mapper.convertValue(user, UserDto.class))
                 .collect(Collectors.toList());
     }
 
     @Override
     public void addFollower(Long userId, Long userToFollow) {
         if (userId == null || userToFollow == null) {
-            throw new IllegalArgumentException("Los identificadores de usuario no deben ser nulos.");
+            throw new IllegalArgumentException("Los ids de los usuarios no deben ser nulos.");
         }
         if (Objects.equals(userId, userToFollow)) {
             throw new IllegalArgumentException("Un usuario no puede seguirse a sí mismo.");
@@ -67,6 +69,42 @@ public class UserService implements IUserService {
         return new FollowersCountDto(userId, userFind.getUserName(), followersCount);
     }
 
+    @Override
+    public UserDto getFollowersById(Long id, String order) {
+        if (!userRepository.existsById(id)) {
+            throw new NotFoundException("No existe el usuario con el id ingresado");
+        }
+
+        User user = userRepository.getById(id);
+
+        List<User> orderedFollowers = getUserListOrderedByName(order, user.getFollowers());
+        List<UserDto> orderedFollowersDtos = orderedFollowers.stream().map(
+                u -> UserDto.builder()
+                        .userId(u.getUserId())
+                        .userName(u.getUserName())
+                        .build())
+                .toList();
+
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .followers(orderedFollowersDtos)
+                .build();
+    }
+
+    private List<User> getUserListOrderedByName(String order, List<User> userList) {
+        switch (order) {
+            case "name_asc":
+                userList = userList.stream().sorted(Comparator.comparing(User::getUserName)).toList();
+                break;
+            case "name_desc":
+                userList = userList.stream().sorted(Comparator.comparing(User::getUserName).reversed()).toList();
+                break;
+        }
+        return userList;
+    }
+
+
     private void loadDataBase() {
         try {
             File file = ResourceUtils.getFile("classpath:users.json");
@@ -75,4 +113,5 @@ public class UserService implements IUserService {
             e.printStackTrace();
         }
     }
+
 }
