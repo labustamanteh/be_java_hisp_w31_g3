@@ -2,20 +2,70 @@
   {
     "userId": 1,
     "userName": "John Doe",
-    "followed": [2, 3],
-    "followers": [3, 5]
+    "followed": [
+      {
+        "userId": 2,
+        "userName": "Jane Smith"
+      },
+      {
+        "userId": 3,
+        "userName": "Alice Johnson"
+      }
+    ],
+    "followers": [
+      {
+        "userId": 3,
+        "userName": "Alice Johnson"
+      },
+      {
+        "userId": 5,
+        "userName": "Charlie King"
+      }
+    ]
   },
   {
     "userId": 2,
     "userName": "Jane Smith",
-    "followed": [1],
-    "followers": [1, 3]
+    "followed": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      }
+    ],
+    "followers": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      },
+      {
+        "userId": 3,
+        "userName": "Alice Johnson"
+      }
+    ]
   },
   {
     "userId": 3,
     "userName": "Alice Johnson",
-    "followed": [1, 2],
-    "followers": [1, 2]
+    "followed": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      },
+      {
+        "userId": 2,
+        "userName": "Jane Smith"
+      }
+    ],
+    "followers": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      },
+      {
+        "userId": 2,
+        "userName": "Jane Smith"
+      }
+    ]
   },
   {
     "userId": 4,
@@ -27,6 +77,11 @@
     "userId": 5,
     "userName": "Charlie King",
     "followed": [],
-    "followers": [1]
+    "followers": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      }
+    ]
   }
 ]

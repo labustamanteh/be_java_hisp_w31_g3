@@ -30,6 +30,11 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public List<User> getUsers() {
+        return usersList;
+    }
+
+    @Override
     public void addFollower(Long userId, Long userToFollow){
         User userFollower = usersList.stream().filter(user -> user.getUserId()
                         .equals(userId)).findFirst()
