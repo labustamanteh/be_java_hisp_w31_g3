@@ -69,7 +69,7 @@ public class UserService implements IUserService {
 
     private void loadDataBase() {
         try {
-            File file = ResourceUtils.getFile("classpath:db_users.json");
+            File file = ResourceUtils.getFile("classpath:users.json");
             this.userRepository.addAll(mapper.readValue(file, new TypeReference<List<User>>() {}));
         } catch (IOException e) {
             e.printStackTrace();
