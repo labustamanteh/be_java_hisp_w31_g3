@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.FollowersCountDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
+import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
@@ -33,17 +34,17 @@ public class UserService implements IUserService {
     public List<UserDto> getUsers() {
         List<User> userList = userRepository.getAll();
         if(userList.isEmpty()){
-            throw new NotFoundException("No existen los usuarios");
+            throw new NotFoundException("No hay usuarios para mostrar");
         }
         return userList.stream()
-                .map(v -> mapper.convertValue(v,UserDto.class))
+                .map(user -> mapper.convertValue(user, UserDto.class))
                 .collect(Collectors.toList());
     }
 
     @Override
     public void addFollower(Long userId, Long userToFollow) {
         if (userId == null || userToFollow == null) {
-            throw new IllegalArgumentException("Los identificadores de usuario no deben ser nulos.");
+            throw new IllegalArgumentException("Los ids de los usuarios no deben ser nulos.");
         }
         if (Objects.equals(userId, userToFollow)) {
             throw new IllegalArgumentException("Un usuario no puede seguirse a sí mismo.");
@@ -68,37 +69,30 @@ public class UserService implements IUserService {
         return new FollowersCountDto(userId, userFind.getUserName(), followersCount);
     }
 
-    private void loadDataBase() {
-        try {
-            File file = ResourceUtils.getFile("classpath:users.json");
-            this.userRepository.addAll(mapper.readValue(file, new TypeReference<List<User>>() {}));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private final UserDto.UserDtoBuilder userDtoBuilder = UserDto.getUserDtoBuilder();
-
     @Override
     public UserDto getFollowersById(Long id, String order) {
         if (!userRepository.existsById(id)) {
-            // TODO: throw not found
+            throw new NotFoundException("No existe el usuario con el id ingresado");
         }
 
         User user = userRepository.getById(id);
-        List<User> orderedFollowers = getUserListOrderedByName(order, user.getFollowers());
-        orderedFollowers.forEach(u -> {
-            u.setFollowed(null);
-            u.setFollowers(null);
-        });
 
-        return userDtoBuilder.withUserId(user.getUserId())
-                .withUserName(user.getUserName())
-                .withFollowers(orderedFollowers)
+        List<User> orderedFollowers = getUserListOrderedByName(order, user.getFollowers());
+        List<UserDto> orderedFollowersDtos = orderedFollowers.stream().map(
+                u -> UserDto.builder()
+                        .userId(u.getUserId())
+                        .userName(u.getUserName())
+                        .build())
+                .toList();
+
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .followers(orderedFollowersDtos)
                 .build();
     }
 
-    private static List<User> getUserListOrderedByName(String order, List<User> userList) {
+    private List<User> getUserListOrderedByName(String order, List<User> userList) {
         switch (order) {
             case "name_asc":
                 userList = userList.stream().sorted(Comparator.comparing(User::getUserName)).toList();
@@ -109,4 +103,15 @@ public class UserService implements IUserService {
         }
         return userList;
     }
+
+
+    private void loadDataBase() {
+        try {
+            File file = ResourceUtils.getFile("classpath:users.json");
+            this.userRepository.addAll(mapper.readValue(file, new TypeReference<List<User>>() {}));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
