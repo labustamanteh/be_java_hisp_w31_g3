@@ -16,13 +16,13 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> badRequest(BadRequestException e) {
+    public ResponseEntity<ExceptionDto> badRequest(BadRequestException e) {
         ExceptionDto exceptionDto = new ExceptionDto(e.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<?> Conflict(ConflictException e) {
+    public ResponseEntity<ExceptionDto> Conflict(ConflictException e) {
         ExceptionDto exceptionDto = new ExceptionDto(e.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.CONFLICT);
     }

@@ -16,6 +16,6 @@ public class User {
     private Long userId;
     private String userName;
     List<User> followers = new ArrayList<>();
-    List<User> follows = new ArrayList<>();
+    List<User> followed = new ArrayList<>();
     
 }

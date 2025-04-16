@@ -12,7 +12,7 @@
                 "userName": "Charlie"
             }
         ],
-        "follows": [
+        "followed": [
             {
                 "userId": 2,
                 "userName": "Bob"
@@ -36,7 +36,7 @@
                 "userName": "Eve"
             }
         ],
-        "follows": [
+        "followed": [
             {
                 "userId": 1,
                 "userName": "Alice"
@@ -52,7 +52,7 @@
                 "userName": "Alice"
             }
         ],
-        "follows": [
+        "followed": [
             {
                 "userId": 4,
                 "userName": "Diana"
@@ -76,7 +76,7 @@
                 "userName": "Charlie"
             }
         ],
-        "follows": [
+        "followed": [
             {
                 "userId": 5,
                 "userName": "Eve"
@@ -96,7 +96,7 @@
                 "userName": "Diana"
             }
         ],
-        "follows": [
+        "followed": [
             {
                 "userId": 6,
                 "userName": "Frank"
@@ -112,7 +112,7 @@
                 "userName": "Charlie"
             }
         ],
-        "follows": [
+        "followed": [
             {
                 "userId": 7,
                 "userName": "Grace"
@@ -128,7 +128,7 @@
                 "userName": "Frank"
             }
         ],
-        "follows": [
+        "followed": [
             {
                 "userId": 8,
                 "userName": "Hannah"
@@ -139,7 +139,7 @@
         "userId": 8,
         "userName": "Hannah",
         "followers": [],
-        "follows": [
+        "followed": [
             {
                 "userId": 9,
                 "userName": "Ian"
@@ -155,12 +155,12 @@
                 "userName": "Hannah"
             }
         ],
-        "follows": []
+        "followed": []
     },
     {
         "userId": 10,
         "userName": "Jack",
         "followers": [],
-        "follows": []
+        "followed": []
     }
 ]

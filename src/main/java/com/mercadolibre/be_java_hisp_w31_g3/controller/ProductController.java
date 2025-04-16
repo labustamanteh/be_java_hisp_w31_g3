@@ -9,7 +9,7 @@ import com.mercadolibre.be_java_hisp_w31_g3.service.IProductService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/products")
 @RequiredArgsConstructor
 
 public class ProductController {
