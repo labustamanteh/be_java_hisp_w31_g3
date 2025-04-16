@@ -13,14 +13,5 @@ public class UserDto {
     private String userName;
     List<UserDto> followed = new ArrayList<>();
     List<UserDto> followers = new ArrayList<>();
-
-
-    public UserDto(Long userId, String userName) {
-        this.userId = userId;
-        this.userName = userName;
-        this.followed = new ArrayList<>();
-        this.followers = new ArrayList<>();
-    }
-
 }
 

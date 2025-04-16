@@ -1,0 +1,32 @@
+[
+  {
+    "userId": 1,
+    "userName": "John Doe",
+    "followed": [],
+    "followers": []
+  },
+  {
+    "userId": 2,
+    "userName": "Jane Smith",
+    "followed": [],
+    "followers": []
+  },
+  {
+    "userId": 3,
+    "userName": "Alice Johnson",
+    "followed": [],
+    "followers": []
+  },
+  {
+    "userId": 4,
+    "userName": "Bob Brown",
+    "followed": [],
+    "followers": []
+  },
+  {
+    "userId": 5,
+    "userName": "Charlie King",
+    "followed": [],
+    "followers": []
+  }
+]

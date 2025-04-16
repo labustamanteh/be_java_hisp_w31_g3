@@ -1,6 +1,7 @@
 package com.mercadolibre.be_java_hisp_w31_g3.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,13 +15,4 @@ public class User {
     private String userName;
     List<User> followed = new ArrayList<>();
     List<User> followers = new ArrayList<>();
-
-
-    //public User(Long userId, String userName) {
-    //    this.userId = userId;
-    //    this.userName = userName;
-    //    this.followed = new ArrayList<>();
-    //    this.followers = new ArrayList<>();
-    //}
-
 }

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class UserRepository implements IUserRepository {
@@ -24,7 +25,7 @@ public class UserRepository implements IUserRepository {
         ObjectMapper objectMapper = new ObjectMapper();
         List<User> users;
 
-        file = ResourceUtils.getFile("classpath:users.json");
+        file = ResourceUtils.getFile("classpath:usersWithoutFollowers.json");
         users = objectMapper.readValue(file, new TypeReference<List<User>>() {});
         usersList = users;
     }
@@ -44,5 +45,11 @@ public class UserRepository implements IUserRepository {
                         .orElse(null);
         userFollowed.getFollowers().add(userFollower);
 
+    }
+
+    @Override
+    public boolean existsById(Long userId) {
+        return usersList.stream()
+                .anyMatch(user -> Objects.equals(user.getUserId(), userId));
     }
 }
