@@ -1,15 +1,17 @@
 package com.mercadolibre.be_java_hisp_w31_g3.controller;
 
-
-import com.mercadolibre.be_java_hisp_w31_g3.service.IProductService;
-import com.mercadolibre.be_java_hisp_w31_g3.service.UserService;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-public class ProductController {
-    IProductService productService;
+import com.mercadolibre.be_java_hisp_w31_g3.service.IPostService;
+import com.mercadolibre.be_java_hisp_w31_g3.service.IProductService;
 
-    public ProductController(UserService userService){
-        this.productService = (IProductService) userService;
-    }
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/products")
+@RequiredArgsConstructor
+public class ProductController {
+    private final IProductService productService;
+    private final IPostService postService;
 }

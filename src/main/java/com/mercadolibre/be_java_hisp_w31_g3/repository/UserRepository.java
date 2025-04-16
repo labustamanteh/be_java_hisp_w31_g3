@@ -1,55 +1,46 @@
 package com.mercadolibre.be_java_hisp_w31_g3.repository;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mercadolibre.be_java_hisp_w31_g3.model.User;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.ResourceUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
+import org.springframework.stereotype.Repository;
+
+import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 
 @Repository
 public class UserRepository implements IUserRepository {
-    private List<User> usersList = new ArrayList<>();
+    private final List<User> users = new ArrayList<>();
 
-    public UserRepository() throws IOException {
-        loadDataBase();
-    }
-
-    private void loadDataBase() throws IOException {
-        File file;
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<User> users;
-
-        file = ResourceUtils.getFile("classpath:usersWithoutFollowers.json");
-        users = objectMapper.readValue(file, new TypeReference<List<User>>() {});
-        usersList = users;
+    @Override
+    public User getById(Long userId) {
+        return users.stream().filter(u -> u.getUserId().equals(userId)).findFirst().orElse(null);
     }
 
     @Override
-    public List<User> getUsers() {
-        return usersList;
+    public Boolean existsById(Long userId) {
+        return users.stream().anyMatch(u -> userId.equals(u.getUserId()));
     }
 
     @Override
-    public void addFollower(Long userId, Long userToFollow){
-        User userFollower = usersList.stream().filter(user -> user.getUserId()
-                        .equals(userId)).findFirst()
-                        .orElse(null);
-        User userFollowed = usersList.stream().filter(user -> user.getUserId()
-                        .equals(userToFollow)).findFirst()
-                        .orElse(null);
-        userFollowed.getFollowers().add(userFollower);
-
+    public void addAll(List<User> users) {
+        this.users.addAll(users);
     }
 
     @Override
-    public boolean existsById(Long userId) {
-        return usersList.stream()
-                .anyMatch(user -> Objects.equals(user.getUserId(), userId));
+    public void add(User user) {
+        this.users.add(user);
     }
+
+    @Override
+    public List<User> getAll() {
+        return users;
+    }
+
+//    public List<User> getAllByPredicate(Predicate<User> predicate) {
+//        return users.stream().filter(predicate).toList();
+//    }
+//
+//    public User getByPredicate(Predicate<User> predicate) {
+//        return users.stream().filter(predicate).findFirst().orElse(null);
+//    }
 }
