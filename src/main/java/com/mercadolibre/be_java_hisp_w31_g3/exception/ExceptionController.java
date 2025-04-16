@@ -22,7 +22,7 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ExceptionDto> Conflict(ConflictException e) {
+    public ResponseEntity<ExceptionDto> conflict(ConflictException e) {
         ExceptionDto exceptionDto = new ExceptionDto(e.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.CONFLICT);
     }
