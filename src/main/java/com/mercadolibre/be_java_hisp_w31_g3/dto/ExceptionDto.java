@@ -1,14 +1,12 @@
 package com.mercadolibre.be_java_hisp_w31_g3.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@NoArgsConstructor
+@Data
 public class ExceptionDto {
     private String message;
 }

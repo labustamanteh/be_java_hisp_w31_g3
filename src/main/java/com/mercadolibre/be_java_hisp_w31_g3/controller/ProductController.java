@@ -11,12 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
-
 public class ProductController {
-    private final  IProductService productService;
-    private final  IPostService postService; 
-    
-   
-    
-
+    private final IProductService productService;
+    private final IPostService postService;
 }

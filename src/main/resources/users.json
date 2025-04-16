@@ -1,0 +1,87 @@
+[
+  {
+    "userId": 1,
+    "userName": "John Doe",
+    "followed": [
+      {
+        "userId": 2,
+        "userName": "Jane Smith"
+      },
+      {
+        "userId": 3,
+        "userName": "Alice Johnson"
+      }
+    ],
+    "followers": [
+      {
+        "userId": 3,
+        "userName": "Alice Johnson"
+      },
+      {
+        "userId": 5,
+        "userName": "Charlie King"
+      }
+    ]
+  },
+  {
+    "userId": 2,
+    "userName": "Jane Smith",
+    "followed": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      }
+    ],
+    "followers": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      },
+      {
+        "userId": 3,
+        "userName": "Alice Johnson"
+      }
+    ]
+  },
+  {
+    "userId": 3,
+    "userName": "Alice Johnson",
+    "followed": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      },
+      {
+        "userId": 2,
+        "userName": "Jane Smith"
+      }
+    ],
+    "followers": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      },
+      {
+        "userId": 2,
+        "userName": "Jane Smith"
+      }
+    ]
+  },
+  {
+    "userId": 4,
+    "userName": "Bob Brown",
+    "followed": [],
+    "followers": []
+  },
+  {
+    "userId": 5,
+    "userName": "Charlie King",
+    "followed": [],
+    "followers": [
+      {
+        "userId": 1,
+        "userName": "John Doe"
+      }
+    ]
+  }
+]
