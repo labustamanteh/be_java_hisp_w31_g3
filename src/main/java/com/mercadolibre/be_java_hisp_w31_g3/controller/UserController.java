@@ -1,6 +1,5 @@
 package com.mercadolibre.be_java_hisp_w31_g3.controller;
 
-import com.mercadolibre.be_java_hisp_w31_g3.dto.FollowersCountDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.service.IUserService;
 import lombok.RequiredArgsConstructor;

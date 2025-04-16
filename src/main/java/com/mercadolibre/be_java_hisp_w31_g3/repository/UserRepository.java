@@ -2,6 +2,7 @@ package com.mercadolibre.be_java_hisp_w31_g3.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
@@ -12,13 +13,16 @@ public class UserRepository implements IUserRepository {
     private final List<User> users = new ArrayList<>();
 
     @Override
-    public User getById(Long userId) {
-        return users.stream().filter(u -> u.getUserId().equals(userId)).findFirst().orElse(null);
+    public Optional<User> getById(Long userId) {
+        return users.stream().filter(u -> u.getUserId().equals(userId)).findFirst();
     }
 
     @Override
-    public Boolean existsById(Long userId) {
-        return users.stream().anyMatch(u -> userId.equals(u.getUserId()));
+    public void addFollower(Long userId, Long followerId) {
+        User userFollower = getById(userId).get();
+        User userFollowed = getById(followerId).get();
+
+        userFollowed.getFollowers().add(userFollower);
     }
 
     @Override
