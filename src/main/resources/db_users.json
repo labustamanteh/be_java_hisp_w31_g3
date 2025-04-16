@@ -1,0 +1,166 @@
+[
+    {
+        "userId": 1,
+        "userName": "Alice",
+        "followers": [
+            {
+                "userId": 2,
+                "userName": "Bob"
+            },
+            {
+                "userId": 3,
+                "userName": "Charlie"
+            }
+        ],
+        "follows": [
+            {
+                "userId": 2,
+                "userName": "Bob"
+            },
+            {
+                "userId": 4,
+                "userName": "Diana"
+            }
+        ]
+    },
+    {
+        "userId": 2,
+        "userName": "Bob",
+        "followers": [
+            {
+                "userId": 1,
+                "userName": "Alice"
+            },
+            {
+                "userId": 5,
+                "userName": "Eve"
+            }
+        ],
+        "follows": [
+            {
+                "userId": 1,
+                "userName": "Alice"
+            }
+        ]
+    },
+    {
+        "userId": 3,
+        "userName": "Charlie",
+        "followers": [
+            {
+                "userId": 1,
+                "userName": "Alice"
+            }
+        ],
+        "follows": [
+            {
+                "userId": 4,
+                "userName": "Diana"
+            },
+            {
+                "userId": 6,
+                "userName": "Frank"
+            }
+        ]
+    },
+    {
+        "userId": 4,
+        "userName": "Diana",
+        "followers": [
+            {
+                "userId": 1,
+                "userName": "Alice"
+            },
+            {
+                "userId": 3,
+                "userName": "Charlie"
+            }
+        ],
+        "follows": [
+            {
+                "userId": 5,
+                "userName": "Eve"
+            }
+        ]
+    },
+    {
+        "userId": 5,
+        "userName": "Eve",
+        "followers": [
+            {
+                "userId": 2,
+                "userName": "Bob"
+            },
+            {
+                "userId": 4,
+                "userName": "Diana"
+            }
+        ],
+        "follows": [
+            {
+                "userId": 6,
+                "userName": "Frank"
+            }
+        ]
+    },
+    {
+        "userId": 6,
+        "userName": "Frank",
+        "followers": [
+            {
+                "userId": 3,
+                "userName": "Charlie"
+            }
+        ],
+        "follows": [
+            {
+                "userId": 7,
+                "userName": "Grace"
+            }
+        ]
+    },
+    {
+        "userId": 7,
+        "userName": "Grace",
+        "followers": [
+            {
+                "userId": 6,
+                "userName": "Frank"
+            }
+        ],
+        "follows": [
+            {
+                "userId": 8,
+                "userName": "Hannah"
+            }
+        ]
+    },
+    {
+        "userId": 8,
+        "userName": "Hannah",
+        "followers": [],
+        "follows": [
+            {
+                "userId": 9,
+                "userName": "Ian"
+            }
+        ]
+    },
+    {
+        "userId": 9,
+        "userName": "Ian",
+        "followers": [
+            {
+                "userId": 8,
+                "userName": "Hannah"
+            }
+        ],
+        "follows": []
+    },
+    {
+        "userId": 10,
+        "userName": "Jack",
+        "followers": [],
+        "follows": []
+    }
+]
