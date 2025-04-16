@@ -5,7 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mercadolibre.be_java_hisp_w31_g3.dto.FollowersCountDto;
 import com.mercadolibre.be_java_hisp_w31_g3.service.IUserService;
-import com.mercadolibre.be_java_hisp_w31_g3.service.UserService;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,14 +14,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
+@RequiredArgsConstructor
+
 public class UserController {
 
-    private IUserService userService;
+    private final IUserService userService;
 
-    public UserController(UserService UserService) {
-        this.userService = UserService;
-    }
+   
 
     @GetMapping("/{userId}/followers/count")
     public ResponseEntity<FollowersCountDto> getFollowersCount(@PathVariable Long userId) {

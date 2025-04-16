@@ -10,7 +10,7 @@ import com.mercadolibre.be_java_hisp_w31_g3.dto.ExceptionDto;
 @ControllerAdvice
 public class ExceptionController {
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<?> notFound(NotFoundException e) {
+    public ResponseEntity<ExceptionDto> notFound(NotFoundException e) {
         ExceptionDto exceptionDto = new ExceptionDto(e.getMessage());
         return new ResponseEntity<>(exceptionDto, HttpStatus.NOT_FOUND);
     }

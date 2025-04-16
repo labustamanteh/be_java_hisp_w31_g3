@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FollowersCountDto {
-    private Long user_id;
-    private String user_name;
-    private Long followers_count;
+    private Long userId;
+    private String userName;
+    private Long followersCount;
 }

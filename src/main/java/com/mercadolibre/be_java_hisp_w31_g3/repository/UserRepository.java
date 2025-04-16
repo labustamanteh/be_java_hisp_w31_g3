@@ -39,7 +39,7 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public Boolean isExistsById(Long userId) {
+    public Boolean existsById(Long userId) {
         return listofUsers.stream().anyMatch(u -> userId.equals(u.getUserId()));
     }
 }
