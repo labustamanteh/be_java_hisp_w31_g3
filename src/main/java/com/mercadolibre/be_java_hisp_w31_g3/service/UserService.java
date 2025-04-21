@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
+import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
@@ -160,6 +161,17 @@ public class UserService implements IUserService {
                 .userName(user.get().getUserName())
                 .followed(userList)
                 .build();
+    }
+
+    @Override
+    public void unfollowUser(Long userId, Long userIdToUnfollow) {
+        if(!userRepository.isAnyMatch(user -> user.getUserId().equals(userId))){
+            throw new BadRequestException("El usuario no se encontró");
+        }
+        if(!userRepository.isAnyMatch(user -> user.getUserId().equals(userIdToUnfollow))){
+            throw new BadRequestException("El usuario a dejar de seguir no se encontró");
+        }
+        userRepository.unfollowUser(userId, userIdToUnfollow);
     }
 
     private List<User> getUserListOrderedByName(String order, List<User> userList) {

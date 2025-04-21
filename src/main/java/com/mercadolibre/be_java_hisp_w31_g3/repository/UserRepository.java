@@ -35,6 +35,15 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public void unfollowUser(Long userId, Long userIdToUnfollow) {
+        User userFollower = getById(userId).get();
+        User userFollowed = getById(userIdToUnfollow).get();
+
+        userFollowed.getFollowers().remove(userFollower);
+        userFollower.getFollowed().remove(userFollowed);
+    }
+
+    @Override
     public void addAll(List<User> users) {
         this.users.addAll(users);
     }
