@@ -2,6 +2,8 @@ package com.mercadolibre.be_java_hisp_w31_g3.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
@@ -35,8 +37,50 @@ public class UserService implements IUserService {
         if (userList.isEmpty()) {
             throw new NotFoundException("No hay usuarios para mostrar");
         }
+
         return userList.stream()
-                .map(user -> mapper.convertValue(user, UserDto.class))
+                .map(user ->
+                        UserDto
+                                .builder()
+                                .userId(user.getUserId())
+                                .userName(user.getUserName())
+                                .followers(user.getFollowers().stream()
+                                        .map(followers ->
+                                                UserDto
+                                                        .builder()
+                                                        .userName(followers.getUserName())
+                                                        .userId(followers.getUserId())
+                                                        .build())
+                                        .collect(Collectors.toList())
+                                )
+                                .followed(
+                                        user.getFollowed().stream()
+                                                .map(followed ->
+                                                        UserDto
+                                                                .builder()
+                                                                .userName(followed.getUserName())
+                                                                .userId(followed.getUserId())
+                                                                .build())
+                                                .collect(Collectors.toList())
+                                )
+                                .posts(
+                                        user.getPosts().stream()
+                                                .map(post ->
+                                                        PostDto
+                                                                .builder()
+                                                                .postId(post.getPostId())
+                                                                .userId(post.getUserId())
+                                                                .date(post.getDate().toString())
+                                                                .product(ProductDto
+                                                                        .builder()
+                                                                        .productName(post.getProduct().getProductName())
+                                                                        .build())
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
+                                )
+                                .build()
+                )
                 .collect(Collectors.toList());
     }
 

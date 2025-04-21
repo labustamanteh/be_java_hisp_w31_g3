@@ -1,22 +1,28 @@
 package com.mercadolibre.be_java_hisp_w31_g3.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.io.Serializable;
+
+@Getter
+@Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class PostDto {
-    @JsonProperty("user_id")
-    private Long userId;
-    @JsonProperty("post_id")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class PostDto implements Serializable {
     private Long postId;
+    @JsonProperty(value = "user_id", required = true)
+    private Long userId;
+    @JsonProperty(required = true)
     private String date;
-    private ProductDto product;
-    private int category;
-    private double price;
-
+    @Builder.Default
+    @JsonProperty(required = true)
+    private ProductDto product = null;
+    @JsonProperty(value = "category", required = true)
+    private Long categoryId;
+    @JsonProperty(required = true)
+    private Double price;
 }
-
