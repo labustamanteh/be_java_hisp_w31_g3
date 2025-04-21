@@ -15,4 +15,5 @@ public interface IUserRepository {
     void addFollower(Long userId, Long followerId);
     Boolean isAnyMatch(Predicate<User> predicate);
     void addPost(Long userId, Post post);
+    void unfollowUser(Long userId, Long userIdToUnfollow);
 }

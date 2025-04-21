@@ -10,4 +10,5 @@ public interface IUserService {
     UserDto getFollowersCount(Long userId);
     UserDto getFollowersById(Long id, String order);
     UserDto getFollowedList(Long id, String order);
+    void unfollowUser(Long userId, Long userIdToUnfollow);
 }
