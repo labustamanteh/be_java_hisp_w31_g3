@@ -2,6 +2,8 @@ package com.mercadolibre.be_java_hisp_w31_g3.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
@@ -32,11 +34,53 @@ public class UserService implements IUserService {
     @Override
     public List<UserDto> getUsers() {
         List<User> userList = userRepository.getAll();
-        if(userList.isEmpty()){
+        if (userList.isEmpty()) {
             throw new NotFoundException("No hay usuarios para mostrar");
         }
+
         return userList.stream()
-                .map(user -> mapper.convertValue(user, UserDto.class))
+                .map(user ->
+                        UserDto
+                                .builder()
+                                .userId(user.getUserId())
+                                .userName(user.getUserName())
+                                .followers(user.getFollowers().stream()
+                                        .map(followers ->
+                                                UserDto
+                                                        .builder()
+                                                        .userName(followers.getUserName())
+                                                        .userId(followers.getUserId())
+                                                        .build())
+                                        .collect(Collectors.toList())
+                                )
+                                .followed(
+                                        user.getFollowed().stream()
+                                                .map(followed ->
+                                                        UserDto
+                                                                .builder()
+                                                                .userName(followed.getUserName())
+                                                                .userId(followed.getUserId())
+                                                                .build())
+                                                .collect(Collectors.toList())
+                                )
+                                .posts(
+                                        user.getPosts().stream()
+                                                .map(post ->
+                                                        PostDto
+                                                                .builder()
+                                                                .postId(post.getPostId())
+                                                                .userId(post.getUserId())
+                                                                .date(post.getDate().toString())
+                                                                .product(ProductDto
+                                                                        .builder()
+                                                                        .productName(post.getProduct().getProductName())
+                                                                        .build())
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
+                                )
+                                .build()
+                )
                 .collect(Collectors.toList());
     }
 
@@ -85,16 +129,36 @@ public class UserService implements IUserService {
 
         List<User> orderedFollowers = getUserListOrderedByName(order, user.getFollowers());
         List<UserDto> orderedFollowersDtos = orderedFollowers.stream().map(
-                u -> UserDto.builder()
-                        .userId(u.getUserId())
-                        .userName(u.getUserName())
-                        .build())
+                        u -> UserDto.builder()
+                                .userId(u.getUserId())
+                                .userName(u.getUserName())
+                                .build())
                 .toList();
 
         return UserDto.builder()
                 .userId(user.getUserId())
                 .userName(user.getUserName())
                 .followers(orderedFollowersDtos)
+                .build();
+    }
+
+    @Override
+    public UserDto getFollowedList(Long id, String order) {
+        Optional<User> user = userRepository.getById(id);
+        if (user.isEmpty())
+            throw new NotFoundException("Error, no se encontró un usuario con el Id enviado.");
+
+        List<User> orderedFollowed = getUserListOrderedByName(order, user.get().getFollowed());
+        List<UserDto> userList = orderedFollowed.stream().map(
+                u -> UserDto.builder()
+                        .userId(u.getUserId())
+                        .userName(u.getUserName()).build()
+        ).toList();
+
+        return UserDto.builder()
+                .userId(user.get().getUserId())
+                .userName(user.get().getUserName())
+                .followed(userList)
                 .build();
     }
 
@@ -114,7 +178,8 @@ public class UserService implements IUserService {
     private void loadDataBase() {
         try {
             File file = ResourceUtils.getFile("classpath:users.json");
-            this.userRepository.addAll(mapper.readValue(file, new TypeReference<List<User>>() {}));
+            this.userRepository.addAll(mapper.readValue(file, new TypeReference<List<User>>() {
+            }));
         } catch (IOException e) {
             e.printStackTrace();
         }

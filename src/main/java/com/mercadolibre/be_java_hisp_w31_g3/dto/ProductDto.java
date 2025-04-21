@@ -1,17 +1,17 @@
-package com.mercadolibre.be_java_hisp_w31_g3.model;
+package com.mercadolibre.be_java_hisp_w31_g3.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.io.Serializable;
 
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
-public class Product {
-    private static Long generatedId = 0L;
+@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ProductDto implements Serializable {
     @JsonProperty("product_id")
     private Long productId;
     @JsonProperty("product_name")
@@ -20,8 +20,4 @@ public class Product {
     private String brand;
     private String color;
     private String notes;
-
-    public Product() {
-        this.productId = ++generatedId;
-    }
 }

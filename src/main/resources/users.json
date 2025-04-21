@@ -1,17 +1,17 @@
 [
   {
-    "userName": "John Doe"
+    "user_name": "John Doe"
   },
   {
-    "userName": "Jane Smith"
+    "user_name": "Jane Smith"
   },
   {
-    "userName": "Alice Johnson"
+    "user_name": "Alice Johnson"
   },
   {
-    "userName": "Bob Brown"
+    "user_name": "Bob Brown"
   },
   {
-    "userName": "Charlie King"
+    "user_name": "Charlie King"
   }
 ]
