@@ -4,14 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@AllArgsConstructor
 @Getter
 @Setter
 public class Product {
-    private int product_id;
-    private String product_name;
+    private static Long generatedId = 0L;
+    private Long productId;
+    private String productName;
     private String type;
     private String brand;
     private String color;
     private String notes;
+
+    public Product() {
+        this.productId = ++generatedId;
+    }
 }

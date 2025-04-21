@@ -1,5 +1,6 @@
 package com.mercadolibre.be_java_hisp_w31_g3.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,8 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class PostDto {
-    private Long user_id;
-    private Long post_id;
+    @JsonProperty("user_id")
+    private Long userId;
+    @JsonProperty("post_id")
+    private Long postId;
     private String date;
     private ProductDto product;
     private int category;

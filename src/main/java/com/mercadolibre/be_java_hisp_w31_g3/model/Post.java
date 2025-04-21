@@ -8,12 +8,16 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class Post {
-    private Long user_id;
-    private Long post_id;
+    private static Long generatedId = 0L;
+    private Long userId;
+    private Long postId;
     private LocalDate date;
     private Product product;
     private int category;
     private double price;
+
+    public Post() {
+        this.postId = ++generatedId;
+    }
 }

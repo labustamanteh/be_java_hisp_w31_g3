@@ -41,17 +41,17 @@ public class ProductService implements IProductService {
                         .map(post -> {
                             Product prod = post.getProduct();
                             ProductDto productDTO = new ProductDto(
-                                    prod.getProduct_id(),
+                                    prod.getProductId(),
                                     prod.getType(),
                                     prod.getBrand(),
-                                    prod.getProduct_name(),
+                                    prod.getProductName(),
                                     prod.getColor(),
                                     prod.getNotes()
                             );
 
                             return new PostDto(
-                                    post.getUser_id(),
-                                    post.getPost_id(),
+                                    post.getUserId(),
+                                    post.getPostId(),
                                     post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                                     productDTO,
                                     post.getCategory(),
@@ -66,10 +66,10 @@ public class ProductService implements IProductService {
 
     private List<PostDto> getPostListOrderedByDate(String order, List<PostDto> postList) {
         switch (order) {
-            case "name_asc":
+            case "date_asc":
                 postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate)).toList();
                 break;
-            case "name_desc":
+            case "date_desc":
                 postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate).reversed()).toList();
                 break;
         }
