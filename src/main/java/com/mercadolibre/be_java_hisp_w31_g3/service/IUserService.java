@@ -9,4 +9,5 @@ public interface IUserService {
     void addFollower(Long userId, Long userToFollow);
     UserDto getFollowersCount(Long userId);
     UserDto getFollowersById(Long id, String order);
+    UserDto getFollowedList(Long id, String order);
 }
