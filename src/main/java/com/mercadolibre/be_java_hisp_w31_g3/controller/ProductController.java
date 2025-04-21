@@ -36,4 +36,9 @@ public class ProductController {
         postService.addPost(postDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+
+    @GetMapping("/promo-post/list")
+    public ResponseEntity<UserDto> getPromoPosts(@RequestParam("user_id") Long userId){
+        return new ResponseEntity<>(postService.getPromoPostByUserId(userId), HttpStatus.OK);
+    }
 }

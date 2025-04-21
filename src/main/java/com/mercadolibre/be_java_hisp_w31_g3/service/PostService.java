@@ -105,6 +105,8 @@ public class PostService implements IPostService {
                 .build();
         userRepository.addPost(postDto.getUserId(), post);
     }
+
+    @Override
     public UserDto getPromoPostByUserId(Long userId){
         Optional<User> userOptional = userRepository.getById(userId);
         if (userOptional.isEmpty()){
