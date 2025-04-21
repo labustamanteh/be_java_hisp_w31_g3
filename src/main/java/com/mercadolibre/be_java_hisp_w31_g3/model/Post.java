@@ -19,6 +19,8 @@ public class Post {
     private Product product;
     private Long categoryId;
     private Double price;
+    private Boolean hasPromo;
+    private Double discount;
 
     public static Long getGeneratedId(){
         return ++generatedId;

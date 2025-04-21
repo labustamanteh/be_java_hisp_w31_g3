@@ -25,4 +25,7 @@ public class PostDto implements Serializable {
     private Long categoryId;
     @JsonProperty(required = true)
     private Double price;
+    @JsonProperty(value = "has_promo")
+    private Boolean hasPromo = false;
+    private Double discount = 0D;
 }
