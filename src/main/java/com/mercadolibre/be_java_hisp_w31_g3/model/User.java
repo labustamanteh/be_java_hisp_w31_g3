@@ -15,7 +15,7 @@ public class User {
     private String userName;
     private List<User> followers = new ArrayList<>();
     private List<User> followed = new ArrayList<>();
-
+    private List<Post> posts = new ArrayList<>();
     public User(){
         this.userId = ++generatedId;
     }

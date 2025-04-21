@@ -1,17 +1,18 @@
-package com.mercadolibre.be_java_hisp_w31_g3.model;
+package com.mercadolibre.be_java_hisp_w31_g3.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
-@Getter
-@Setter
-public class Product {
+@NoArgsConstructor
+@Data
+public class ProductDto {
     private int product_id;
-    private String product_name;
     private String type;
     private String brand;
+    private String name;
     private String color;
     private String notes;
+
 }

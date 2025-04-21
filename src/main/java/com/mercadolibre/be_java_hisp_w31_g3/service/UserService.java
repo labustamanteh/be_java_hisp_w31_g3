@@ -32,7 +32,7 @@ public class UserService implements IUserService {
     @Override
     public List<UserDto> getUsers() {
         List<User> userList = userRepository.getAll();
-        if(userList.isEmpty()){
+        if (userList.isEmpty()) {
             throw new NotFoundException("No hay usuarios para mostrar");
         }
         return userList.stream()
@@ -85,16 +85,36 @@ public class UserService implements IUserService {
 
         List<User> orderedFollowers = getUserListOrderedByName(order, user.getFollowers());
         List<UserDto> orderedFollowersDtos = orderedFollowers.stream().map(
-                u -> UserDto.builder()
-                        .userId(u.getUserId())
-                        .userName(u.getUserName())
-                        .build())
+                        u -> UserDto.builder()
+                                .userId(u.getUserId())
+                                .userName(u.getUserName())
+                                .build())
                 .toList();
 
         return UserDto.builder()
                 .userId(user.getUserId())
                 .userName(user.getUserName())
                 .followers(orderedFollowersDtos)
+                .build();
+    }
+
+    @Override
+    public UserDto getFollowedList(Long id, String order) {
+        Optional<User> user = userRepository.getById(id);
+        if (user.isEmpty())
+            throw new NotFoundException("Error, no se encontró un usuario con el Id enviado.");
+
+        List<User> orderedFollowed = getUserListOrderedByName(order, user.get().getFollowed());
+        List<UserDto> userList = orderedFollowed.stream().map(
+                u -> UserDto.builder()
+                        .userId(u.getUserId())
+                        .userName(u.getUserName()).build()
+        ).toList();
+
+        return UserDto.builder()
+                .userId(user.get().getUserId())
+                .userName(user.get().getUserName())
+                .followed(userList)
                 .build();
     }
 
@@ -114,7 +134,8 @@ public class UserService implements IUserService {
     private void loadDataBase() {
         try {
             File file = ResourceUtils.getFile("classpath:users.json");
-            this.userRepository.addAll(mapper.readValue(file, new TypeReference<List<User>>() {}));
+            this.userRepository.addAll(mapper.readValue(file, new TypeReference<List<User>>() {
+            }));
         } catch (IOException e) {
             e.printStackTrace();
         }
