@@ -1,6 +1,7 @@
 package com.mercadolibre.be_java_hisp_w31_g3.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Getter
 @Builder
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
     private Long userId;
@@ -18,6 +20,8 @@ public class UserDto {
     private List<UserDto> followed = null;
     @Builder.Default
     private Long followersCount = null;
+    @Builder.Default
+    private List<PostDto> posts = null;
 
     public UserDto(){}
 
