@@ -11,14 +11,14 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 public class UserDto {
+    @JsonProperty("user_id")
     private Long userId;
+    @JsonProperty("user_name")
     private String userName;
-    @JsonIdentityReference(alwaysAsId = true)
     private List<UserDto> followers = null;
-    @JsonIdentityReference(alwaysAsId = true)
     private List<UserDto> followed = null;
+    @JsonProperty("followers_count")
     private Long followersCount = null;
     private List<PostDto> posts = null;
 
