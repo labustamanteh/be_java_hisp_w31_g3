@@ -121,6 +121,9 @@ public class PostService implements IPostService {
             throw new NotFoundException("No hay usuarios para mostrar");
         }
 
-        return new UserDto.builder().userId(user.getUserId()).userName(user.getUserName()).posts(promoPosts).build();
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .posts(promoPosts).build();
     }
 }
