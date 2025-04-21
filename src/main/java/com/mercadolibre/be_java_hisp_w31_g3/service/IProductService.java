@@ -1,9 +1,7 @@
 package com.mercadolibre.be_java_hisp_w31_g3.service;
 
-import com.mercadolibre.be_java_hisp_w31_g3.dto.PostResponseDto;
-
-import java.util.Optional;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 
 public interface IProductService {
-    PostResponseDto getPostFollowed(Long id, String order);
+    UserDto getPostFollowed(Long id, String order);
 }

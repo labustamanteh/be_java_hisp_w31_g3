@@ -1,6 +1,6 @@
 package com.mercadolibre.be_java_hisp_w31_g3.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,16 +11,15 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 public class UserDto {
     private Long userId;
     private String userName;
-    @Builder.Default
+    @JsonIdentityReference(alwaysAsId = true)
     private List<UserDto> followers = null;
-    @Builder.Default
+    @JsonIdentityReference(alwaysAsId = true)
     private List<UserDto> followed = null;
-    @Builder.Default
     private Long followersCount = null;
-    @Builder.Default
     private List<PostDto> posts = null;
 
     public UserDto(){}

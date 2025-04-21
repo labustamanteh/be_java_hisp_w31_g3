@@ -21,6 +21,6 @@ public class PostController {
     @PostMapping("/product")
     public ResponseEntity<Void> addPost(@RequestBody PostDto postDto){
         postService.addPost(postDto);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

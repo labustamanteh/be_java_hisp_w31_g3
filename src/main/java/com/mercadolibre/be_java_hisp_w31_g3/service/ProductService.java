@@ -1,21 +1,18 @@
 package com.mercadolibre.be_java_hisp_w31_g3.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
-import com.mercadolibre.be_java_hisp_w31_g3.dto.PostResponseDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
-import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
-import com.mercadolibre.be_java_hisp_w31_g3.model.Product;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import com.mercadolibre.be_java_hisp_w31_g3.repository.IProductRepository;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +21,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductService implements IProductService {
-    private final IProductRepository productRepository;
     private final IUserRepository userRepository;
-
+    private final ObjectMapper mapper;
 
     @Override
-    public PostResponseDto getPostFollowed(Long id, String order) {
+    public UserDto getPostFollowed(Long id, String order) {
         Optional<User> user = userRepository.getById(id);
         if (user.isEmpty())
             throw new NotFoundException("No se encontró un usuario con el Id enviado.");
@@ -38,30 +34,21 @@ public class ProductService implements IProductService {
         List<PostDto> posts = user.get().getFollowed().stream()
                 .flatMap(u -> u.getPosts().stream()
                         .filter(post -> post.getDate().isAfter(date))
-                        .map(post -> {
-                            Product prod = post.getProduct();
-                            ProductDto productDTO = new ProductDto(
-                                    prod.getProductId(),
-                                    prod.getType(),
-                                    prod.getBrand(),
-                                    prod.getProductName(),
-                                    prod.getColor(),
-                                    prod.getNotes()
-                            );
+                        .map(post ->
+                                PostDto
+                                        .builder()
+                                        .postId(post.getPostId())
+                                        .userId(post.getUserId())
+                                        .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                                        .product(mapper.convertValue(post.getProduct(), ProductDto.class))
+                                        .categoryId(post.getCategoryId())
+                                        .price(post.getPrice())
+                                        .build()
 
-                            return new PostDto(
-                                    post.getUserId(),
-                                    post.getPostId(),
-                                    post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
-                                    productDTO,
-                                    post.getCategory(),
-                                    post.getPrice()
-                            );
-                        })
-                )
+                        ))
                 .collect(Collectors.toList());
 
-        return new PostResponseDto(user.get().getUserId(), getPostListOrderedByDate(order, posts));
+        return UserDto.builder().userId(id).posts(getPostListOrderedByDate(order, posts)).build();
     }
 
     private List<PostDto> getPostListOrderedByDate(String order, List<PostDto> postList) {

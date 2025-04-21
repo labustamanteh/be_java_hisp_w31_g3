@@ -7,22 +7,17 @@ import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Product;
-import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import com.mercadolibre.be_java_hisp_w31_g3.repository.IPostRepository;
-
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PostService implements IPostService {
-    private final IPostRepository productRepository;
     private final IUserRepository userRepository;
     private final ObjectMapper mapper;
 
@@ -41,13 +36,12 @@ public class PostService implements IPostService {
             throw new BadRequestException("Error: "  + e.getMessage());
         }
 
-        Optional<User> userOptional = userRepository.getById(postDto.getUserId());
-        if(userOptional.isEmpty()){
+        if(!userRepository.isAnyMatch(user -> user.getUserId().equals(postDto.getUserId()))){
             throw new NotFoundException("No se encontró el usuario con el id ingresado");
         }
 
         ProductDto productDto = postDto.getProduct();
-        productRepository.add(Post.builder()
+        Post post = Post.builder()
                 .postId(Post.getGeneratedId())
                 .price(postDto.getPrice())
                 .date(formattedDate)
@@ -61,6 +55,7 @@ public class PostService implements IPostService {
                         .color(productDto.getColor())
                         .notes(productDto.getNotes())
                         .build())
-                .build());
+                .build();
+        userRepository.addPost(postDto.getUserId(), post);
     }
 }

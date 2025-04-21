@@ -3,7 +3,9 @@ package com.mercadolibre.be_java_hisp_w31_g3.repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
+import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import org.springframework.stereotype.Repository;
 
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
@@ -23,6 +25,13 @@ public class UserRepository implements IUserRepository {
         User userFollowed = getById(followerId).get();
 
         userFollowed.getFollowers().add(userFollower);
+        userFollower.getFollowed().add(userFollowed);
+    }
+
+    @Override
+    public void addPost(Long userId, Post post) {
+        User user = getById(userId).get();
+        user.getPosts().add(post);
     }
 
     @Override
@@ -44,7 +53,8 @@ public class UserRepository implements IUserRepository {
 //        return users.stream().filter(predicate).toList();
 //    }
 //
-//    public User getByPredicate(Predicate<User> predicate) {
-//        return users.stream().filter(predicate).findFirst().orElse(null);
-//    }
+    @Override
+    public Boolean isAnyMatch(Predicate<User> predicate) {
+        return users.stream().anyMatch(predicate);
+    }
 }
