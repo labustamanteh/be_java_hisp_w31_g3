@@ -133,7 +133,8 @@ public class PostService implements IPostService {
 
     @Override
     public List<PostDto> getPromoPostByDiscount(Double discount){
-        if (discount >1 || discount<0){
+        //double discount = dis/100;
+        if (discount >0 || discount<1){
             throw new BadRequestException("El valor del descuento no es valido");
         }
         List<PostDto> postDtos = userRepository.getAll().stream()
