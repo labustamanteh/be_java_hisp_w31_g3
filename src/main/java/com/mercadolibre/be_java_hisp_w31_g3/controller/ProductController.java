@@ -34,7 +34,7 @@ public class ProductController {
     }
 
     @PostMapping("/promo-post")
-    public ResponseEntity<?> createPromoPost(@RequestBody PostDto postDto){
+    public ResponseEntity<Void> createPromoPost(@RequestBody PostDto postDto){
         postService.addPost(postDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
