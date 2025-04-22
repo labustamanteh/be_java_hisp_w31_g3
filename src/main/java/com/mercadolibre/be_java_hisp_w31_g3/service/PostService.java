@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -112,7 +113,8 @@ public class PostService implements IPostService {
         }
         List<PostDto> postDtos = userRepository.getAll().stream()
                 .flatMap(user -> user.getPosts().stream())
-                .filter(post -> Double.compare(post.getDiscount(), discount) == 0)
+                .filter(post -> Objects.equals(post.getDiscount(), discount))
+                //.filter(post -> Double.compare(post.getDiscount(), discount) == 0)
                 .map(post -> mapper.convertValue(post, PostDto.class))
                 .toList();
         if (postDtos.isEmpty()) {
