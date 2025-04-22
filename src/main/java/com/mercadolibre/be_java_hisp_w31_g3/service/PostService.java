@@ -120,7 +120,7 @@ public class PostService implements IPostService {
                 .toList();
 
         if(promoPosts.isEmpty()){
-            throw new NotFoundException("No hay usuarios para mostrar");
+            throw new NotFoundException("No hay Productos en promocion");
         }
 
         return UserDto.builder()
