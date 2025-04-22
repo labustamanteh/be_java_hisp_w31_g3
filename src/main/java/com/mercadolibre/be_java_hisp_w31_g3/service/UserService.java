@@ -88,10 +88,10 @@ public class UserService implements IUserService {
     @Override
     public void addFollower(Long userId, Long userToFollow) {
         if (userId == null || userToFollow == null) {
-            throw new IllegalArgumentException("Los ids de los usuarios no deben ser nulos.");
+            throw new BadRequestException("Los ids de los usuarios no deben ser nulos.");
         }
         if (Objects.equals(userId, userToFollow)) {
-            throw new IllegalArgumentException("Un usuario no puede seguirse a sí mismo.");
+            throw new BadRequestException("Un usuario no puede seguirse a sí mismo.");
         }
 
         Optional<User> userFollower = userRepository.getById(userId);
@@ -99,6 +99,11 @@ public class UserService implements IUserService {
 
         if (userFollower.isEmpty() || userFollowed.isEmpty()) {
             throw new NotFoundException("Alguno de los usuarios no existe.");
+        }
+
+        if (userFollowed.get().getFollowers().stream().anyMatch(follower -> follower.getUserId().equals(userId))
+        || userFollower.get().getFollowed().stream().anyMatch(followed -> followed.getUserId().equals(userToFollow))) {
+            throw new BadRequestException("El usuario ya sigue a este usuario.");
         }
 
         userRepository.addFollower(userId, userToFollow);

@@ -5,6 +5,7 @@ import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
+import com.mercadolibre.be_java_hisp_w31_g3.exception.ConflictException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Product;
@@ -65,42 +66,80 @@ public class PostService implements IPostService {
 
     @Override
     public void addPost(PostDto postDto) {
-        if (postDto.getDate().trim().isEmpty()) {
+        validatePostDate(postDto.getDate());
+        checkUserExists(postDto.getUserId());
+        checkProductUniqueness(postDto);
+
+        ProductDto productDto = postDto.getProduct();
+        Post post = createPost(postDto, productDto);
+
+        userRepository.addPost(postDto.getUserId(), post);
+    }
+
+    private void validatePostDate(String date) {
+        if (date.trim().isEmpty()) {
             throw new BadRequestException("La fecha no puede estar vacía");
         }
 
-        LocalDate formattedDate;
         try {
-            formattedDate = LocalDate.parse(postDto.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         } catch (DateTimeException e) {
             throw new BadRequestException("La fecha no está en el formato adecuado dd-MM-yyyy");
         } catch (Exception e) {
             throw new BadRequestException("Error: " + e.getMessage());
         }
+    }
 
-        if (!userRepository.isAnyMatch(user -> user.getUserId().equals(postDto.getUserId()))) {
+    private void checkUserExists(Long userId) {
+        if (!userRepository.isAnyMatch(user -> user.getUserId().equals(userId))) {
             throw new NotFoundException("No se encontró el usuario con el id ingresado");
         }
+    }
 
-        ProductDto productDto = postDto.getProduct();
-        Post post = Post.builder()
+    private void checkProductUniqueness(PostDto postDto) {
+        Predicate<PostDto> postDtoPredicate = post -> post.getProduct().getProductName().equals(postDto.getProduct().getProductName())
+                && post.getProduct().getBrand().equals(postDto.getProduct().getBrand())
+                && post.getProduct().getType().equals(postDto.getProduct().getType())
+                && post.getProduct().getColor().equals(postDto.getProduct().getColor())
+                && post.getProduct().getNotes().equals(postDto.getProduct().getNotes());
+
+        Optional<PostDto> exactMatch = getPostList().stream()
+                .filter(postDtoPredicate.and(post -> !post.getProduct().getProductId().equals(postDto.getProduct().getProductId()))).findFirst();
+
+        if (exactMatch.isPresent()) {
+            throw new ConflictException("Un producto con las mismas características ya existe, id: " + exactMatch.get().getProduct().getProductId());
+        }
+
+        boolean hasProductWithDifferentCharacteristics = getPostList().stream()
+                .anyMatch(post -> post.getProduct().getProductId().equals(postDto.getProduct().getProductId()))
+                && getPostList().stream().noneMatch(postDtoPredicate);
+
+        if (hasProductWithDifferentCharacteristics) {
+            throw new ConflictException("Un producto con el id ingresado con diferentes características ya existe. Ingrese un id diferente.");
+        }
+    }
+
+    private Post createPost(PostDto postDto, ProductDto productDto) {
+        LocalDate formattedDate = LocalDate.parse(postDto.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        Product product = Product.builder()
+                .productId(productDto.getProductId())
+                .productName(productDto.getProductName())
+                .type(productDto.getType())
+                .brand(productDto.getBrand())
+                .color(productDto.getColor())
+                .notes(productDto.getNotes())
+                .build();
+
+        return Post.builder()
                 .postId(Post.getGeneratedId())
                 .price(postDto.getPrice())
                 .date(formattedDate)
                 .categoryId(postDto.getCategoryId())
                 .userId(postDto.getUserId())
-                .product(Product.builder()
-                        .productId(productDto.getProductId())
-                        .productName(productDto.getProductName())
-                        .type(productDto.getType())
-                        .brand(productDto.getBrand())
-                        .color(productDto.getColor())
-                        .notes(productDto.getNotes())
-                        .build())
+                .product(product)
                 .hasPromo(postDto.getHasPromo())
                 .discount(postDto.getDiscount())
                 .build();
-        userRepository.addPost(postDto.getUserId(), post);
     }
 
     @Override
@@ -163,7 +202,7 @@ public class PostService implements IPostService {
             throw new NotFoundException("No se encontró el usuario con el id ingresado");
         }
         User user = optionalUser.get();
-        Long postWithPromoCount = user.getPosts().stream().filter(p -> p.getHasPromo()).count();
+        Long postWithPromoCount = user.getPosts().stream().filter(Post::getHasPromo).count();
 
         return UserDto.builder()
                 .userId(user.getUserId())
@@ -177,7 +216,7 @@ public class PostService implements IPostService {
             return getPostList();
         }
 
-        Predicate<PostDto> postPredicate = getPostDtoPredicate(discount, categoryId, color, hasPromo);
+        Predicate<PostDto> postPredicate = createPostFilterPredicate(discount, categoryId, color, hasPromo);
 
         List<PostDto> postDtos = getPostList().stream()
                                 .filter(postPredicate)
@@ -190,7 +229,7 @@ public class PostService implements IPostService {
         return postDtos;
     }
 
-    private static Predicate<PostDto> getPostDtoPredicate(Double discount, Long categoryId, String color, Boolean hasPromo) {
+    private static Predicate<PostDto> createPostFilterPredicate(Double discount, Long categoryId, String color, Boolean hasPromo) {
         Predicate<PostDto> postPredicate = p -> true;
 
         if (hasPromo != null) {
