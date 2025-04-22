@@ -10,6 +10,4 @@ public interface IPostService {
     void addPost(PostDto postDto);
 
     UserDto getPromoPostByUserId(Long userId);
-
-    List<PostDto> getPromoPostByDiscount(Double discount);
 }
