@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.function.Predicate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,8 +38,7 @@ public class PostService implements IPostService {
         List<PostDto> posts = user.get().getFollowed().stream()
                 .flatMap(u -> u.getPosts().stream()
                         .filter(post -> post.getDate().isAfter(date))
-                        .map(post -> PostDto
-                                .builder()
+                        .map(post -> PostDto.builder()
                                 .postId(post.getPostId())
                                 .userId(post.getUserId())
                                 .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
@@ -47,9 +46,7 @@ public class PostService implements IPostService {
                                 .categoryId(post.getCategoryId())
                                 .price(post.getPrice())
                                 .build()
-
-                        ))
-                .collect(Collectors.toList());
+                        )).collect(Collectors.toList());
 
         return UserDto.builder().userId(id).posts(getPostListOrderedByDate(order, posts)).build();
     }
@@ -142,6 +139,22 @@ public class PostService implements IPostService {
                 .posts(promoPosts).build();
     }
 
+    @Override
+    public List<PostDto> getPostList(){
+        return userRepository.getAll().stream()
+                .flatMap(user -> user.getPosts().stream())
+                .map(post -> PostDto.builder()
+                        .postId(post.getPostId())
+                        .userId(post.getUserId())
+                        .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                        .product(mapper.convertValue(post.getProduct(), ProductDto.class))
+                        .categoryId(post.getCategoryId())
+                        .price(post.getPrice())
+                        .hasPromo(post.getHasPromo())
+                        .discount(post.getDiscount())
+                        .build()
+                ).toList();
+    }
 
     @Override
     public UserDto getPromoPostCount(Long userId) {
@@ -156,5 +169,50 @@ public class PostService implements IPostService {
                 .userId(user.getUserId())
                 .userName(user.getUserName())
                 .promoProductsCount(postWithPromoCount).build();
+    }
+
+    @Override
+    public List<PostDto> getPostsByFilter(Double discount, Long categoryId, String color, Boolean hasPromo) {
+        if (discount == null && categoryId == null && color.isEmpty() && hasPromo == null) {
+            return getPostList();
+        }
+
+        Predicate<PostDto> postPredicate = getPostDtoPredicate(discount, categoryId, color, hasPromo);
+
+        List<PostDto> postDtos = getPostList().stream()
+                                .filter(postPredicate)
+                                .toList();
+
+        if (postDtos.isEmpty()) {
+            throw new NotFoundException("No se encontraron publicaciones con el filtro proporcionado.");
+        }
+
+        return postDtos;
+    }
+
+    private static Predicate<PostDto> getPostDtoPredicate(Double discount, Long categoryId, String color, Boolean hasPromo) {
+        Predicate<PostDto> postPredicate = p -> true;
+
+        if (hasPromo != null) {
+            postPredicate = p -> p.getHasPromo().equals(hasPromo);
+        }
+
+        if (discount != null && discount != 0) {
+            if (discount > 1 || discount < 0) {
+                throw new BadRequestException("El valor del descuento no es válido");
+            } else {
+                postPredicate = postPredicate.and(p -> p.getDiscount().equals(discount));
+            }
+        }
+
+        if (categoryId != null && categoryId != 0) {
+            postPredicate = postPredicate.and(p -> p.getCategoryId().equals(categoryId));
+        }
+
+        if (!color.isEmpty()) {
+            postPredicate = postPredicate.and(p -> p.getProduct().getColor().toLowerCase()
+                    .contains(color.toLowerCase()));
+        }
+        return postPredicate;
     }
 }

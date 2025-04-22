@@ -9,6 +9,7 @@ public interface IPostService {
     UserDto getPostFollowed(Long id, String order);
     UserDto getPromoPostCount(Long userId);
     void addPost(PostDto postDto);
-
     UserDto getPromoPostByUserId(Long userId);
+    List<PostDto> getPostList();
+    List<PostDto> getPostsByFilter(Double discount, Long categoryId, String color, Boolean hasPromo);
 }

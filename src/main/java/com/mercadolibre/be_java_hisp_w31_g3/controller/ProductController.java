@@ -24,8 +24,7 @@ public class ProductController {
     private final IPostService postService;
 
     @GetMapping("/followed/{userId}/list")
-    public ResponseEntity<UserDto> getFollowedByUserId(@PathVariable Long userId,
-            @RequestParam(required = false, defaultValue = "") String order) {
+    public ResponseEntity<UserDto> getFollowedByUserId(@PathVariable Long userId, @RequestParam(required = false, defaultValue = "") String order) {
         return new ResponseEntity<>(postService.getPostFollowed(userId, order), HttpStatus.OK);
     }
 
@@ -49,5 +48,13 @@ public class ProductController {
     @GetMapping("/promo-post/list")
     public ResponseEntity<UserDto> getPromoPosts(@RequestParam("user_id") Long userId){
         return new ResponseEntity<>(postService.getPromoPostByUserId(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/post/list")
+    public ResponseEntity<List<PostDto>> getPromoPostsByFilter(@RequestParam(required = false) Double discount,
+                                                               @RequestParam(required = false) Long categoryId,
+                                                               @RequestParam(required = false, defaultValue = "") String color,
+                                                               @RequestParam(required = false) Boolean hasPromo) {
+        return new ResponseEntity<>(postService.getPostsByFilter(discount, categoryId, color, hasPromo), HttpStatus.OK);
     }
 }
