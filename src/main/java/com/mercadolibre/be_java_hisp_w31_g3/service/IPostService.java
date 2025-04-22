@@ -11,5 +11,5 @@ public interface IPostService {
     void addPost(PostDto postDto);
     UserDto getPromoPostByUserId(Long userId);
     List<PostDto> getPostList();
-    List<PostDto> getPostsByFilter(String discount, String categoryId, String color, String hasPromo);
+    List<PostDto> getPostsByFilter(Double discount, Long categoryId, String color, Boolean hasPromo);
 }
