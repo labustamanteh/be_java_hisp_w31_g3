@@ -51,10 +51,10 @@ public class ProductController {
     }
 
     @GetMapping("/post/list")
-    public ResponseEntity<List<PostDto>> getPromoPostsByFilter(@RequestParam(required = false, defaultValue = "") String discount,
-                                                               @RequestParam(required = false, defaultValue = "") String categoryId,
+    public ResponseEntity<List<PostDto>> getPromoPostsByFilter(@RequestParam(required = false) Double discount,
+                                                               @RequestParam(required = false) Long categoryId,
                                                                @RequestParam(required = false, defaultValue = "") String color,
-                                                               @RequestParam(required = false, defaultValue = "") String hasPromo) {
+                                                               @RequestParam(required = false) Boolean hasPromo) {
         return new ResponseEntity<>(postService.getPostsByFilter(discount, categoryId, color, hasPromo), HttpStatus.OK);
     }
 }

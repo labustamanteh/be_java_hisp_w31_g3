@@ -143,19 +143,32 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public UserDto getPromoPostByUserId(Long userId){
+    public UserDto getPromoPostByUserId(Long userId) {
         Optional<User> userOptional = userRepository.getById(userId);
-        if (userOptional.isEmpty()){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        if (userOptional.isEmpty()) {
             throw new NotFoundException("Usuario no encontrado");
         }
 
         User user = userOptional.get();
         List<PostDto> promoPosts = user.getPosts().stream()
                 .filter(Post::getHasPromo)
-                .map(post -> mapper.convertValue(post, PostDto.class))
+                .map(post -> {
+                    String formattedDate = post.getDate().format(formatter);
+                    return mapper.convertValue(PostDto.builder()
+                            .postId(post.getPostId())
+                            .userId(post.getUserId())
+                            .date(formattedDate)
+                            .product(mapper.convertValue(post.getProduct(), ProductDto.class))
+                            .categoryId(post.getCategoryId())
+                            .price(post.getPrice())
+                            .hasPromo(post.getHasPromo())
+                            .discount(post.getDiscount())
+                            .build(), PostDto.class);
+                })
                 .toList();
 
-        if(promoPosts.isEmpty()){
+        if (promoPosts.isEmpty()) {
             throw new NotFoundException("No hay Productos en promoción");
         }
 
@@ -198,9 +211,9 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public List<PostDto> getPostsByFilter(String discount, String categoryId, String color, String hasPromo) {
-        if (discount.isEmpty() && categoryId.isEmpty() && color.isEmpty() ) {
-            throw new BadRequestException("No hay ningún valor en alguno de los filtros para producir un resultado");
+    public List<PostDto> getPostsByFilter(Double discount, Long categoryId, String color, Boolean hasPromo) {
+        if (discount == null && categoryId == null && color.isEmpty() && hasPromo == null) {
+            return getPostList();
         }
 
         Predicate<PostDto> postPredicate = createPostFilterPredicate(discount, categoryId, color, hasPromo);
@@ -216,28 +229,23 @@ public class PostService implements IPostService {
         return postDtos;
     }
 
-    private static Predicate<PostDto> createPostFilterPredicate(String discount, String categoryId, String color, String hasPromo) {
+    private static Predicate<PostDto> createPostFilterPredicate(Double discount, Long categoryId, String color, Boolean hasPromo) {
         Predicate<PostDto> postPredicate = p -> true;
 
-        if (!hasPromo.isEmpty()) {
-            boolean hasPromoBoolean = Boolean.parseBoolean(hasPromo);
-            postPredicate = p -> p.getHasPromo().equals(hasPromoBoolean);
+        if (hasPromo != null) {
+            postPredicate = p -> p.getHasPromo().equals(hasPromo);
         }
 
-        if (!discount.isEmpty()) {
-            double discountDouble = Double.parseDouble(discount);
-            if (discountDouble > 1 || discountDouble < 0) {
+        if (discount != null && discount != 0) {
+            if (discount > 1 || discount < 0) {
                 throw new BadRequestException("El valor del descuento no es válido");
             } else {
-                postPredicate = postPredicate.and(p -> p.getDiscount().equals(discountDouble));
+                postPredicate = postPredicate.and(p -> p.getDiscount().equals(discount));
             }
         }
 
-        if (!categoryId.isEmpty()) {
-            long categoryIdLong = Long.parseLong(categoryId);
-            if (categoryIdLong != 0) {
-                postPredicate = postPredicate.and(p -> p.getCategoryId().equals(categoryIdLong));
-            }
+        if (categoryId != null && categoryId != 0) {
+            postPredicate = postPredicate.and(p -> p.getCategoryId().equals(categoryId));
         }
 
         if (!color.isEmpty()) {
@@ -246,5 +254,4 @@ public class PostService implements IPostService {
         }
         return postPredicate;
     }
-
 }
