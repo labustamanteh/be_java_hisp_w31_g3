@@ -103,11 +103,11 @@ public class PostService implements IPostService {
                 && post.getProduct().getColor().equals(postDto.getProduct().getColor())
                 && post.getProduct().getNotes().equals(postDto.getProduct().getNotes());
 
-        boolean hasExactMatch = getPostList().stream()
-                .anyMatch(postDtoPredicate.and(post -> post.getProduct().getProductId().equals(postDto.getProduct().getProductId())));
+        Optional<PostDto> exactMatch = getPostList().stream()
+                .filter(postDtoPredicate.and(post -> !post.getProduct().getProductId().equals(postDto.getProduct().getProductId()))).findFirst();
 
-        if (hasExactMatch) {
-            throw new ConflictException("Un producto con las mismas características ya existe.");
+        if (exactMatch.isPresent()) {
+            throw new ConflictException("Un producto con las mismas características ya existe, id: " + exactMatch.get().getProduct().getProductId());
         }
 
         boolean hasProductWithDifferentCharacteristics = getPostList().stream()
@@ -115,7 +115,7 @@ public class PostService implements IPostService {
                 && getPostList().stream().noneMatch(postDtoPredicate);
 
         if (hasProductWithDifferentCharacteristics) {
-            throw new ConflictException("Un producto con el id ingresado pero con diferentes características ya existe. Ingrese un id diferente.");
+            throw new ConflictException("Un producto con el id ingresado con diferentes características ya existe. Ingrese un id diferente.");
         }
     }
 
