@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -40,5 +42,10 @@ public class ProductController {
     @GetMapping("/promo-post/list")
     public ResponseEntity<UserDto> getPromoPosts(@RequestParam("user_id") Long userId){
         return new ResponseEntity<>(postService.getPromoPostByUserId(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/promo-post/list")
+    public ResponseEntity<List<PostDto>> getPromoPostsByDiscount(@RequestParam("discount") Double discount) {
+        return new ResponseEntity<>(postService.getPromoPostByDiscount(discount), HttpStatus.OK);
     }
 }

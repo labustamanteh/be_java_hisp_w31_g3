@@ -107,23 +107,6 @@ public class PostService implements IPostService {
         userRepository.addPost(postDto.getUserId(), post);
     }
 
-    public List<PostDto> getPromoPostByDiscount(Double discount){
-        if (discount >1 || discount<0){
-            throw new BadRequestException("El valor del descuento no es valido");
-        }
-        List<PostDto> postDtos = userRepository.getAll().stream()
-                .flatMap(user -> user.getPosts().stream())
-                .filter(post -> Objects.equals(post.getDiscount(), discount))
-                //.filter(post -> Double.compare(post.getDiscount(), discount) == 0)
-                .map(post -> mapper.convertValue(post, PostDto.class))
-                .toList();
-        if (postDtos.isEmpty()) {
-            throw new NotFoundException("No se encontraron publicaciones con el descuento proporcionado.");
-        }
-        return postDtos;
-
-    }
-
     @Override
     public UserDto getPromoPostByUserId(Long userId){
         Optional<User> userOptional = userRepository.getById(userId);
@@ -145,5 +128,24 @@ public class PostService implements IPostService {
                 .userId(user.getUserId())
                 .userName(user.getUserName())
                 .posts(promoPosts).build();
+    }
+
+
+    @Override
+    public List<PostDto> getPromoPostByDiscount(Double discount){
+        if (discount >1 || discount<0){
+            throw new BadRequestException("El valor del descuento no es valido");
+        }
+        List<PostDto> postDtos = userRepository.getAll().stream()
+                .flatMap(user -> user.getPosts().stream())
+                .filter(post -> Objects.equals(post.getDiscount(), discount))
+                //.filter(post -> Double.compare(post.getDiscount(), discount) == 0)
+                .map(post -> mapper.convertValue(post, PostDto.class))
+                .toList();
+        if (postDtos.isEmpty()) {
+            throw new NotFoundException("No se encontraron publicaciones con el descuento proporcionado.");
+        }
+        return postDtos;
+
     }
 }
