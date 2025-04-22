@@ -11,5 +11,7 @@ public interface IPostService {
 
     UserDto getPromoPostByUserId(Long userId);
 
+    List<PostDto> getPostList();
+
     List<PostDto> getPromoPostByDiscount(Double discount);
 }

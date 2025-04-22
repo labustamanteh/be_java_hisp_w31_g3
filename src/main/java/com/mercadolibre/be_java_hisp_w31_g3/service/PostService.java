@@ -130,23 +130,25 @@ public class PostService implements IPostService {
                 .posts(promoPosts).build();
     }
 
+    @Override
+    public List<PostDto> getPostList(){
+        return userRepository.getAll().stream()
+                .flatMap(user -> user.getPosts().stream())
+                .map(post -> mapper.convertValue(post, PostDto.class))
+                .toList();
+    }
 
     @Override
     public List<PostDto> getPromoPostByDiscount(Double discount){
-        //double discount = dis/100;
-        if (discount >0 || discount<1){
-            throw new BadRequestException("El valor del descuento no es valido");
-        }
-        List<PostDto> postDtos = userRepository.getAll().stream()
-                .flatMap(user -> user.getPosts().stream())
-                .filter(post -> Objects.equals(post.getDiscount(), discount))
-                //.filter(post -> Double.compare(post.getDiscount(), discount) == 0)
-                .map(post -> mapper.convertValue(post, PostDto.class))
-                .toList();
+        if (discount >1 || discount<0){
+                    throw new BadRequestException("El valor del descuento no es valido");
+                }
+        List<PostDto> postDtos = getPostList().stream()
+                                .filter(post -> Objects.equals(post.getDiscount(), discount))
+                                .toList();
         if (postDtos.isEmpty()) {
             throw new NotFoundException("No se encontraron publicaciones con el descuento proporcionado.");
         }
         return postDtos;
-
     }
 }
