@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -28,7 +30,7 @@ public class ProductController {
     }
 
     @GetMapping("/promo-post/count")
-    public ResponseEntity<UserDto> getPromoPostCount(@RequestParam Long userId) {
+    public ResponseEntity<UserDto> getPromoPostCount(@RequestParam("user_id") Long userId) {
         return new ResponseEntity<>(postService.getPromoPostCount(userId), HttpStatus.OK);
     }
 
@@ -39,8 +41,13 @@ public class ProductController {
     }
 
     @PostMapping("/promo-post")
-    public ResponseEntity<?> createPromoPost(@RequestBody PostDto postDto) {
+    public ResponseEntity<Void> createPromoPost(@RequestBody PostDto postDto){
         postService.addPost(postDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @GetMapping("/promo-post/list")
+    public ResponseEntity<UserDto> getPromoPosts(@RequestParam("user_id") Long userId){
+        return new ResponseEntity<>(postService.getPromoPostByUserId(userId), HttpStatus.OK);
     }
 }

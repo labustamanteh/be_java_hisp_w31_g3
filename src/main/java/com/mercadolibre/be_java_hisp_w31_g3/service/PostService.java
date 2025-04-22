@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -105,6 +106,28 @@ public class PostService implements IPostService {
         userRepository.addPost(postDto.getUserId(), post);
     }
 
+    @Override
+    public UserDto getPromoPostByUserId(Long userId){
+        Optional<User> userOptional = userRepository.getById(userId);
+        if (userOptional.isEmpty()){
+            throw new NotFoundException("Usuario no encontrado");
+        }
+
+        User user = userOptional.get();
+        List<PostDto> promoPosts = user.getPosts().stream()
+                .filter(Post::getHasPromo)
+                .map(post -> mapper.convertValue(post, PostDto.class))
+                .toList();
+
+        if(promoPosts.isEmpty()){
+            throw new NotFoundException("No hay Productos en promoción");
+        }
+
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .posts(promoPosts).build();
+    }
     @Override
     public UserDto getPromoPostCount(Long userId) {
         Optional<User> optionalUser = userRepository.getById(userId);

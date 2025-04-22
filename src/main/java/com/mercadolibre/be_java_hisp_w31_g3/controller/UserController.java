@@ -27,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/follow/{userIdToFollow}")
-    public ResponseEntity<?> addFollower(@PathVariable Long userId, @PathVariable Long userIdToFollow){
+    public ResponseEntity<Void> addFollower(@PathVariable Long userId, @PathVariable Long userIdToFollow){
         userService.addFollower(userId, userIdToFollow);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -49,5 +49,7 @@ public class UserController {
         userService.unfollowUser(userId, userIdToUnfollow);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
 
 }
