@@ -16,8 +16,10 @@ import org.springframework.stereotype.Service;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.function.Predicate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,19 +38,15 @@ public class PostService implements IPostService {
         List<PostDto> posts = user.get().getFollowed().stream()
                 .flatMap(u -> u.getPosts().stream()
                         .filter(post -> post.getDate().isAfter(date))
-                        .map(post ->
-                                PostDto
-                                        .builder()
-                                        .postId(post.getPostId())
-                                        .userId(post.getUserId())
-                                        .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
-                                        .product(mapper.convertValue(post.getProduct(), ProductDto.class))
-                                        .categoryId(post.getCategoryId())
-                                        .price(post.getPrice())
-                                        .build()
-
-                        ))
-                .collect(Collectors.toList());
+                        .map(post -> PostDto.builder()
+                                .postId(post.getPostId())
+                                .userId(post.getUserId())
+                                .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                                .product(mapper.convertValue(post.getProduct(), ProductDto.class))
+                                .categoryId(post.getCategoryId())
+                                .price(post.getPrice())
+                                .build()
+                        )).collect(Collectors.toList());
 
         return UserDto.builder().userId(id).posts(getPostListOrderedByDate(order, posts)).build();
     }
@@ -67,20 +65,20 @@ public class PostService implements IPostService {
 
     @Override
     public void addPost(PostDto postDto) {
-        if(postDto.getDate().trim().isEmpty()){
+        if (postDto.getDate().trim().isEmpty()) {
             throw new BadRequestException("La fecha no puede estar vacía");
         }
 
         LocalDate formattedDate;
-        try{
+        try {
             formattedDate = LocalDate.parse(postDto.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        }catch (DateTimeException e){
+        } catch (DateTimeException e) {
             throw new BadRequestException("La fecha no está en el formato adecuado dd-MM-yyyy");
-        }catch (Exception e){
-            throw new BadRequestException("Error: "  + e.getMessage());
+        } catch (Exception e) {
+            throw new BadRequestException("Error: " + e.getMessage());
         }
 
-        if(!userRepository.isAnyMatch(user -> user.getUserId().equals(postDto.getUserId()))){
+        if (!userRepository.isAnyMatch(user -> user.getUserId().equals(postDto.getUserId()))) {
             throw new NotFoundException("No se encontró el usuario con el id ingresado");
         }
 
@@ -119,7 +117,7 @@ public class PostService implements IPostService {
                 .toList();
 
         if(promoPosts.isEmpty()){
-            throw new NotFoundException("No hay Productos en promocion");
+            throw new NotFoundException("No hay Productos en promoción");
         }
 
         return UserDto.builder()
@@ -143,6 +141,21 @@ public class PostService implements IPostService {
                         .discount(post.getDiscount())
                         .build()
                 ).toList();
+    }
+
+    @Override
+    public UserDto getPromoPostCount(Long userId) {
+        Optional<User> optionalUser = userRepository.getById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new NotFoundException("No se encontró el usuario con el id ingresado");
+        }
+        User user = optionalUser.get();
+        Long postWithPromoCount = user.getPosts().stream().filter(p -> p.getHasPromo()).count();
+
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .promoProductsCount(postWithPromoCount).build();
     }
 
     @Override
@@ -194,4 +207,5 @@ public class PostService implements IPostService {
         }
         return postPredicate;
     }
+
 }
