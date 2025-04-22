@@ -12,6 +12,8 @@ import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/products")
@@ -21,18 +23,23 @@ public class ProductController {
 
     @GetMapping("/followed/{userId}/list")
     public ResponseEntity<UserDto> getFollowedByUserId(@PathVariable Long userId,
-                                                       @RequestParam(required = false, defaultValue = "") String order) {
+            @RequestParam(required = false, defaultValue = "") String order) {
         return new ResponseEntity<>(postService.getPostFollowed(userId, order), HttpStatus.OK);
     }
 
+    @GetMapping("/promo-post/count")
+    public ResponseEntity<UserDto> getPromoPostCount(@RequestParam Long userId) {
+        return new ResponseEntity<>(postService.getPromoPostCount(userId), HttpStatus.OK);
+    }
+
     @PostMapping("/post")
-    public ResponseEntity<Void> addPost(@RequestBody PostDto postDto){
+    public ResponseEntity<Void> addPost(@RequestBody PostDto postDto) {
         postService.addPost(postDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping("/promo-post")
-    public ResponseEntity<?> createPromoPost(@RequestBody PostDto postDto){
+    public ResponseEntity<?> createPromoPost(@RequestBody PostDto postDto) {
         postService.addPost(postDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

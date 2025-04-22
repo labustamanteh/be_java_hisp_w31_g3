@@ -37,16 +37,15 @@ public class PostService implements IPostService {
         List<PostDto> posts = user.get().getFollowed().stream()
                 .flatMap(u -> u.getPosts().stream()
                         .filter(post -> post.getDate().isAfter(date))
-                        .map(post ->
-                                PostDto
-                                        .builder()
-                                        .postId(post.getPostId())
-                                        .userId(post.getUserId())
-                                        .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
-                                        .product(mapper.convertValue(post.getProduct(), ProductDto.class))
-                                        .categoryId(post.getCategoryId())
-                                        .price(post.getPrice())
-                                        .build()
+                        .map(post -> PostDto
+                                .builder()
+                                .postId(post.getPostId())
+                                .userId(post.getUserId())
+                                .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                                .product(mapper.convertValue(post.getProduct(), ProductDto.class))
+                                .categoryId(post.getCategoryId())
+                                .price(post.getPrice())
+                                .build()
 
                         ))
                 .collect(Collectors.toList());
@@ -68,20 +67,20 @@ public class PostService implements IPostService {
 
     @Override
     public void addPost(PostDto postDto) {
-        if(postDto.getDate().trim().isEmpty()){
+        if (postDto.getDate().trim().isEmpty()) {
             throw new BadRequestException("La fecha no puede estar vacía");
         }
 
         LocalDate formattedDate;
-        try{
+        try {
             formattedDate = LocalDate.parse(postDto.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        }catch (DateTimeException e){
+        } catch (DateTimeException e) {
             throw new BadRequestException("La fecha no está en el formato adecuado dd-MM-yyyy");
-        }catch (Exception e){
-            throw new BadRequestException("Error: "  + e.getMessage());
+        } catch (Exception e) {
+            throw new BadRequestException("Error: " + e.getMessage());
         }
 
-        if(!userRepository.isAnyMatch(user -> user.getUserId().equals(postDto.getUserId()))){
+        if (!userRepository.isAnyMatch(user -> user.getUserId().equals(postDto.getUserId()))) {
             throw new NotFoundException("No se encontró el usuario con el id ingresado");
         }
 
@@ -104,5 +103,20 @@ public class PostService implements IPostService {
                 .discount(postDto.getDiscount())
                 .build();
         userRepository.addPost(postDto.getUserId(), post);
+    }
+
+    @Override
+    public UserDto getPromoPostCount(Long userId) {
+        Optional<User> optionalUser = userRepository.getById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new NotFoundException("No se encontró el usuario con el id ingresado");
+        }
+        User user = optionalUser.get();
+        Long postWithPromoCount = user.getPosts().stream().filter(p -> p.getHasPromo()).count();
+
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .promoProductsCount(postWithPromoCount).build();
     }
 }
