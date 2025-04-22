@@ -16,6 +16,8 @@ public class UserDto {
     private Long userId;
     @JsonProperty("user_name")
     private String userName;
+    @JsonProperty("promo_products_count")
+    private Long promoProductsCount;
     private List<UserDto> followers = null;
     private List<UserDto> followed = null;
     @JsonProperty("followers_count")

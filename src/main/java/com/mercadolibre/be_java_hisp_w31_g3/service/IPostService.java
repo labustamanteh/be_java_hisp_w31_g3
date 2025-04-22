@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface IPostService {
     UserDto getPostFollowed(Long id, String order);
+    UserDto getPromoPostCount(Long userId);
     void addPost(PostDto postDto);
 
     UserDto getPromoPostByUserId(Long userId);
