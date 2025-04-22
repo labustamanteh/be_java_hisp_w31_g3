@@ -174,7 +174,7 @@ public class PostService implements IPostService {
     @Override
     public List<PostDto> getPostsByFilter(Double discount, Long categoryId, String color, Boolean hasPromo) {
         if (discount == null && categoryId == null && color.isEmpty() && hasPromo == null) {
-            throw new BadRequestException("No hay ningún valor en alguno de los filtros para producir un resultado");
+            return getPostList();
         }
 
         Predicate<PostDto> postPredicate = getPostDtoPredicate(discount, categoryId, color, hasPromo);
@@ -215,5 +215,4 @@ public class PostService implements IPostService {
         }
         return postPredicate;
     }
-
 }
