@@ -8,10 +8,7 @@ import java.util.List;
 public interface IPostService {
     UserDto getPostFollowed(Long id, String order);
     void addPost(PostDto postDto);
-
     UserDto getPromoPostByUserId(Long userId);
-
     List<PostDto> getPostList();
-
-    List<PostDto> getPromoPostByDiscount(Double discount);
+    List<PostDto> getPostsByFilter(String discount, String categoryId, String color, String hasPromo);
 }

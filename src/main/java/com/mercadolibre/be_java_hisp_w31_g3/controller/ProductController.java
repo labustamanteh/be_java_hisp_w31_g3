@@ -44,8 +44,11 @@ public class ProductController {
         return new ResponseEntity<>(postService.getPromoPostByUserId(userId), HttpStatus.OK);
     }
 
-    @GetMapping("/promo-post/list")
-    public ResponseEntity<List<PostDto>> getPromoPostsByDiscount(@RequestParam("discount") Double discount) {
-        return new ResponseEntity<>(postService.getPromoPostByDiscount(discount), HttpStatus.OK);
+    @GetMapping("/post/list")
+    public ResponseEntity<List<PostDto>> getPromoPostsByFilter(@RequestParam(required = false, defaultValue = "") String discount,
+                                                               @RequestParam(required = false, defaultValue = "") String categoryId,
+                                                               @RequestParam(required = false, defaultValue = "") String color,
+                                                               @RequestParam(required = false, defaultValue = "") String hasPromo) {
+        return new ResponseEntity<>(postService.getPostsByFilter(discount, categoryId, color, hasPromo), HttpStatus.OK);
     }
 }

@@ -16,10 +16,8 @@ import org.springframework.stereotype.Service;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -134,21 +132,66 @@ public class PostService implements IPostService {
     public List<PostDto> getPostList(){
         return userRepository.getAll().stream()
                 .flatMap(user -> user.getPosts().stream())
-                .map(post -> mapper.convertValue(post, PostDto.class))
-                .toList();
+                .map(post -> PostDto.builder()
+                        .postId(post.getPostId())
+                        .userId(post.getUserId())
+                        .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                        .product(mapper.convertValue(post.getProduct(), ProductDto.class))
+                        .categoryId(post.getCategoryId())
+                        .price(post.getPrice())
+                        .hasPromo(post.getHasPromo())
+                        .discount(post.getDiscount())
+                        .build()
+                ).toList();
     }
 
     @Override
-    public List<PostDto> getPromoPostByDiscount(Double discount){
-        if (discount >1 || discount<0){
-                    throw new BadRequestException("El valor del descuento no es valido");
-                }
-        List<PostDto> postDtos = getPostList().stream()
-                                .filter(post -> Objects.equals(post.getDiscount(), discount))
-                                .toList();
-        if (postDtos.isEmpty()) {
-            throw new NotFoundException("No se encontraron publicaciones con el descuento proporcionado.");
+    public List<PostDto> getPostsByFilter(String discount, String categoryId, String color, String hasPromo) {
+        if (discount.isEmpty() && categoryId.isEmpty() && color.isEmpty() ) {
+            throw new BadRequestException("No hay ningún valor en alguno de los filtros para producir un resultado");
         }
+
+        Predicate<PostDto> postPredicate = getPostDtoPredicate(discount, categoryId, color, hasPromo);
+
+        List<PostDto> postDtos = getPostList().stream()
+                                .filter(postPredicate)
+                                .toList();
+
+        if (postDtos.isEmpty()) {
+            throw new NotFoundException("No se encontraron publicaciones con el filtro proporcionado.");
+        }
+
         return postDtos;
+    }
+
+    private static Predicate<PostDto> getPostDtoPredicate(String discount, String categoryId, String color, String hasPromo) {
+        Predicate<PostDto> postPredicate = p -> true;
+
+        if (!hasPromo.isEmpty()) {
+            boolean hasPromoBoolean = Boolean.parseBoolean(hasPromo);
+            postPredicate = p -> p.getHasPromo().equals(hasPromoBoolean);
+        }
+
+        if (!discount.isEmpty()) {
+            double discountDouble = Double.parseDouble(discount);
+            if (discountDouble > 1 || discountDouble < 0) {
+                throw new BadRequestException("El valor del descuento no es válido");
+            } else {
+                postPredicate = postPredicate.and(p -> p.getDiscount().equals(discountDouble));
+            }
+        }
+
+        if (!categoryId.isEmpty()) {
+            long categoryIdLong = Long.parseLong(categoryId);
+            if (categoryIdLong != 0) {
+                postPredicate = postPredicate.and(p -> p.getCategoryId().equals(categoryIdLong));
+            }
+        }
+
+        if (!color.isEmpty()) {
+            postPredicate = postPredicate.and(p -> p.getProduct().getColor().toLowerCase()
+                    .contains(color.toLowerCase()));
+        }
+        return postPredicate;
     }
 }
