@@ -107,19 +107,32 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public UserDto getPromoPostByUserId(Long userId){
+    public UserDto getPromoPostByUserId(Long userId) {
         Optional<User> userOptional = userRepository.getById(userId);
-        if (userOptional.isEmpty()){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        if (userOptional.isEmpty()) {
             throw new NotFoundException("Usuario no encontrado");
         }
 
         User user = userOptional.get();
         List<PostDto> promoPosts = user.getPosts().stream()
                 .filter(Post::getHasPromo)
-                .map(post -> mapper.convertValue(post, PostDto.class))
+                .map(post -> {
+                    String formattedDate = post.getDate().format(formatter);
+                    return mapper.convertValue(PostDto.builder()
+                            .postId(post.getPostId())
+                            .userId(post.getUserId())
+                            .date(formattedDate)
+                            .product(mapper.convertValue(post.getProduct(), ProductDto.class))
+                            .categoryId(post.getCategoryId())
+                            .price(post.getPrice())
+                            .hasPromo(post.getHasPromo())
+                            .discount(post.getDiscount())
+                            .build(), PostDto.class);
+                })
                 .toList();
 
-        if(promoPosts.isEmpty()){
+        if (promoPosts.isEmpty()) {
             throw new NotFoundException("No hay Productos en promoción");
         }
 
@@ -128,6 +141,8 @@ public class PostService implements IPostService {
                 .userName(user.getUserName())
                 .posts(promoPosts).build();
     }
+
+
     @Override
     public UserDto getPromoPostCount(Long userId) {
         Optional<User> optionalUser = userRepository.getById(userId);
