@@ -37,11 +37,24 @@ public class PostService implements IPostService {
             throw new NotFoundException("No se encontró un usuario con el Id enviado.");
         LocalDate date = LocalDate.now().minusWeeks(2);
 
+//        List<PostDto> posts = user.get().getFollowed().stream()
+//                .flatMap(u -> u.getPosts().stream()
+//                        .filter(post -> post.getDate().isAfter(date))
+//                        .map(PostMapper::convertToPostDto))
+//                .toList();
+
         List<PostDto> posts = user.get().getFollowed().stream()
                 .flatMap(u -> u.getPosts().stream()
                         .filter(post -> post.getDate().isAfter(date))
-                        .map(PostMapper::converToPostDto))
-                        .collect(Collectors.toList());
+                        .map(post -> PostDto.builder()
+                                .postId(post.getPostId())
+                                .userId(post.getUserId())
+                                .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                                .product(mapper.convertValue(post.getProduct(), ProductDto.class))
+                                .categoryId(post.getCategoryId())
+                                .price(post.getPrice())
+                                .build()
+                        )).collect(Collectors.toList());
 
         return UserDto.builder().userId(id).posts(getPostListOrderedByDate(order, posts)).build();
     }
@@ -139,7 +152,6 @@ public class PostService implements IPostService {
     @Override
     public UserDto getPromoPostByUserId(Long userId) {
         Optional<User> userOptional = userRepository.getById(userId);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         if (userOptional.isEmpty()) {
             throw new NotFoundException("Usuario no encontrado");
         }
@@ -147,7 +159,7 @@ public class PostService implements IPostService {
         User user = userOptional.get();
         List<PostDto> promoPosts = user.getPosts().stream()
                 .filter(Post::getHasPromo)
-                .map(PostMapper::converToPostDto)
+                .map(PostMapper::convertToPostDto)
                 .toList();
 
         if (promoPosts.isEmpty()) {
@@ -164,7 +176,7 @@ public class PostService implements IPostService {
     public List<PostDto> getPostList(){
         return userRepository.getAll().stream()
                 .flatMap(user -> user.getPosts().stream())
-                .map(PostMapper::converToPostDto).toList();
+                .map(PostMapper::convertToPostDto).toList();
     }
 
     @Override

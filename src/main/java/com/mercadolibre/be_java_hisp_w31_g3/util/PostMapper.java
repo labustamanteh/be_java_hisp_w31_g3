@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -14,10 +13,10 @@ public class PostMapper {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static List<PostDto> convertPostsToDtos(List<Post> posts){
-        return posts.stream().map(PostMapper::converToPostDto).toList();
+        return posts.stream().map(PostMapper::convertToPostDto).toList();
     }
 
-    public static PostDto converToPostDto(Post post){
+    public static PostDto convertToPostDto(Post post){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         return PostDto.builder()
