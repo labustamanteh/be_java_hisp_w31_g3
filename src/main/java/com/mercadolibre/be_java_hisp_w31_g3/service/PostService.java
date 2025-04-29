@@ -11,6 +11,7 @@ import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Product;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
+import com.mercadolibre.be_java_hisp_w31_g3.util.PostMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,15 +40,8 @@ public class PostService implements IPostService {
         List<PostDto> posts = user.get().getFollowed().stream()
                 .flatMap(u -> u.getPosts().stream()
                         .filter(post -> post.getDate().isAfter(date))
-                        .map(post -> PostDto.builder()
-                                .postId(post.getPostId())
-                                .userId(post.getUserId())
-                                .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
-                                .product(mapper.convertValue(post.getProduct(), ProductDto.class))
-                                .categoryId(post.getCategoryId())
-                                .price(post.getPrice())
-                                .build()
-                        )).collect(Collectors.toList());
+                        .map(PostMapper::converToPostDto))
+                        .collect(Collectors.toList());
 
         return UserDto.builder().userId(id).posts(getPostListOrderedByDate(order, posts)).build();
     }
@@ -153,19 +147,7 @@ public class PostService implements IPostService {
         User user = userOptional.get();
         List<PostDto> promoPosts = user.getPosts().stream()
                 .filter(Post::getHasPromo)
-                .map(post -> {
-                    String formattedDate = post.getDate().format(formatter);
-                    return mapper.convertValue(PostDto.builder()
-                            .postId(post.getPostId())
-                            .userId(post.getUserId())
-                            .date(formattedDate)
-                            .product(mapper.convertValue(post.getProduct(), ProductDto.class))
-                            .categoryId(post.getCategoryId())
-                            .price(post.getPrice())
-                            .hasPromo(post.getHasPromo())
-                            .discount(post.getDiscount())
-                            .build(), PostDto.class);
-                })
+                .map(PostMapper::converToPostDto)
                 .toList();
 
         if (promoPosts.isEmpty()) {
@@ -182,17 +164,7 @@ public class PostService implements IPostService {
     public List<PostDto> getPostList(){
         return userRepository.getAll().stream()
                 .flatMap(user -> user.getPosts().stream())
-                .map(post -> PostDto.builder()
-                        .postId(post.getPostId())
-                        .userId(post.getUserId())
-                        .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
-                        .product(mapper.convertValue(post.getProduct(), ProductDto.class))
-                        .categoryId(post.getCategoryId())
-                        .price(post.getPrice())
-                        .hasPromo(post.getHasPromo())
-                        .discount(post.getDiscount())
-                        .build()
-                ).toList();
+                .map(PostMapper::converToPostDto).toList();
     }
 
     @Override

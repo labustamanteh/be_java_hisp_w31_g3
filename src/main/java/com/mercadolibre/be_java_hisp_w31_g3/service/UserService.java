@@ -7,8 +7,11 @@ import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
+import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
+import com.mercadolibre.be_java_hisp_w31_g3.util.PostMapper;
+import com.mercadolibre.be_java_hisp_w31_g3.util.UserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
@@ -40,49 +43,8 @@ public class UserService implements IUserService {
         }
 
         return userList.stream()
-                .map(user ->
-                        UserDto
-                                .builder()
-                                .userId(user.getUserId())
-                                .userName(user.getUserName())
-                                .followers(user.getFollowers().stream()
-                                        .map(followers ->
-                                                UserDto
-                                                        .builder()
-                                                        .userName(followers.getUserName())
-                                                        .userId(followers.getUserId())
-                                                        .build())
-                                        .collect(Collectors.toList())
-                                )
-                                .followed(
-                                        user.getFollowed().stream()
-                                                .map(followed ->
-                                                        UserDto
-                                                                .builder()
-                                                                .userName(followed.getUserName())
-                                                                .userId(followed.getUserId())
-                                                                .build())
-                                                .collect(Collectors.toList())
-                                )
-                                .posts(
-                                        user.getPosts().stream()
-                                                .map(post ->
-                                                        PostDto
-                                                                .builder()
-                                                                .postId(post.getPostId())
-                                                                .userId(post.getUserId())
-                                                                .date(post.getDate().toString())
-                                                                .product(ProductDto
-                                                                        .builder()
-                                                                        .productName(post.getProduct().getProductName())
-                                                                        .build())
-                                                                .build()
-                                                )
-                                                .collect(Collectors.toList())
-                                )
-                                .build()
-                )
-                .collect(Collectors.toList());
+                .map(UserMapper::getUserDto)
+                .toList();
     }
 
     @Override
