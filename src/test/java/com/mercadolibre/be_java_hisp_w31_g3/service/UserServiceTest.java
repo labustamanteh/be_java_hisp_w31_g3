@@ -72,7 +72,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void addFollower_SameUserId_ThrowsBadRequestException() { {
+    void addFollower_UserFollowItself_ThrowsBadRequestException() {
         // Arrange
         Long userId = 1L;
 
@@ -90,7 +90,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void addFollower_UserAlreadyFollowed_ThrowsBadRequestException() { {
+    void addFollower_UserAlreadyFollowed_ThrowsBadRequestException()  {
         // Arrange
         User user1 = new User();
         User user2 = new User();
