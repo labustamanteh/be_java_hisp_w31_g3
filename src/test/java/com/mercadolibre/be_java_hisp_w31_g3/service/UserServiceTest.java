@@ -72,7 +72,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void addFollower_UserFollowItself_ThrowsBadRequestException() {
+    void addFollower_SameUserId_ThrowsBadRequestException() { {
         // Arrange
         Long userId = 1L;
 
@@ -90,7 +90,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void addFollower_UserAlreadyFollows_ThrowsBadRequestException() {
+    void addFollower_UserAlreadyFollowed_ThrowsBadRequestException() { {
         // Arrange
         User user1 = new User();
         User user2 = new User();
@@ -98,7 +98,7 @@ public class UserServiceTest {
         long userId1 = user1.getUserId();
         long userId2 = user2.getUserId();
 
-        user1.getFollowed().add(user2);  // Indica que user1 ya sigue a user2
+        user1.getFollowed().add(user2);
 
         when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
         when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
