@@ -14,8 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,18 +44,11 @@ public class UserServiceTest {
         when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
         when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
 
-        doAnswer(invocation -> {
-            user1.getFollowed().add(user2);
-            user2.getFollowers().add(user1);
-            return null;
-        }).when(userRepository).addFollower(userId1, userId2);
-
         // Act
         userService.addFollower(userId1, userId2);
 
         // Assert
-        assertTrue(user2.getFollowers().contains(user1), "User1 debería ser un seguidor de User2");
-        assertTrue(user1.getFollowed().contains(user2), "User2 debería ser un seguidor de User1");
+        verify(userRepository).addFollower(userId1, userId2);
     }
 
     @Test
