@@ -37,24 +37,11 @@ public class PostService implements IPostService {
             throw new NotFoundException("No se encontró un usuario con el Id enviado.");
         LocalDate date = LocalDate.now().minusWeeks(2);
 
-//        List<PostDto> posts = user.get().getFollowed().stream()
-//                .flatMap(u -> u.getPosts().stream()
-//                        .filter(post -> post.getDate().isAfter(date))
-//                        .map(PostMapper::convertToPostDto))
-//                .toList();
-
         List<PostDto> posts = user.get().getFollowed().stream()
                 .flatMap(u -> u.getPosts().stream()
                         .filter(post -> post.getDate().isAfter(date))
-                        .map(post -> PostDto.builder()
-                                .postId(post.getPostId())
-                                .userId(post.getUserId())
-                                .date(post.getDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
-                                .product(mapper.convertValue(post.getProduct(), ProductDto.class))
-                                .categoryId(post.getCategoryId())
-                                .price(post.getPrice())
-                                .build()
-                        )).collect(Collectors.toList());
+                        .map(PostMapper::convertToPostDto))
+                .toList();
 
         return UserDto.builder().userId(id).posts(getPostListOrderedByDate(order, posts)).build();
     }
