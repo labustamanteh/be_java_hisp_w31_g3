@@ -37,21 +37,22 @@ public class UserServiceTest {
     void addFollower_ValidUsers_FollowersListUpdated() {
         // Arrange
         User user1 = new User();
-        user1.setUserName("User1");
         User user2 = new User();
-        user2.setUserName("User2");
 
-        when(userRepository.getById(user1.getUserId())).thenReturn(Optional.of(user1));
-        when(userRepository.getById(user2.getUserId())).thenReturn(Optional.of(user2));
+        long userId1 = user1.getUserId();
+        long userId2 = user2.getUserId();
+
+        when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
+        when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
 
         doAnswer(invocation -> {
             user1.getFollowed().add(user2);
             user2.getFollowers().add(user1);
             return null;
-        }).when(userRepository).addFollower(user1.getUserId(), user2.getUserId());
+        }).when(userRepository).addFollower(userId1, userId2);
 
         // Act
-        userService.addFollower(user1.getUserId(), user2.getUserId());
+        userService.addFollower(userId1, userId2);
 
         // Assert
         assertTrue(user2.getFollowers().contains(user1), "User1 debería ser un seguidor de User2");
@@ -93,12 +94,16 @@ public class UserServiceTest {
         // Arrange
         User user1 = new User();
         User user2 = new User();
-        user1.getFollowed().add(user2);
 
-        when(userRepository.getById(user1.getUserId())).thenReturn(Optional.of(user1));
-        when(userRepository.getById(user2.getUserId())).thenReturn(Optional.of(user2));
+        long userId1 = user1.getUserId();
+        long userId2 = user2.getUserId();
+
+        user1.getFollowed().add(user2);  // Indica que user1 ya sigue a user2
+
+        when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
+        when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
 
         // Act & Assert
-        assertThrows(BadRequestException.class, () -> userService.addFollower(user1.getUserId(), user2.getUserId()));
+        assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId2));
     }
 }
