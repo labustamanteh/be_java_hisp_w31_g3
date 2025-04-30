@@ -30,7 +30,8 @@ public class UserServiceTest {
     private UserService userService;
 
     @BeforeEach
-    void setUp(){User.resetIdCounter();}
+    void setUp(){
+    }
 
     @Test
     void testAddFollower() {
@@ -40,17 +41,17 @@ public class UserServiceTest {
         User user2 = new User();
         user2.setUserName("User2");
 
-        when(userRepository.getById(1L)).thenReturn(Optional.of(user1));
-        when(userRepository.getById(2L)).thenReturn(Optional.of(user2));
+        when(userRepository.getById(user1.getUserId())).thenReturn(Optional.of(user1));
+        when(userRepository.getById(user2.getUserId())).thenReturn(Optional.of(user2));
 
         doAnswer(invocation -> {
             user1.getFollowed().add(user2);
             user2.getFollowers().add(user1);
             return null;
-        }).when(userRepository).addFollower(1L, 2L);
+        }).when(userRepository).addFollower(user1.getUserId(), user2.getUserId());
 
         // Act
-        userService.addFollower(1L, 2L);
+        userService.addFollower(user1.getUserId(), user2.getUserId());
 
         // Assert
         assertTrue(user2.getFollowers().contains(user1), "User1 deberia ser un seguidor de User2");
@@ -94,12 +95,11 @@ public class UserServiceTest {
         User user2 = new User();
 
         user1.getFollowed().add(user2);
-        //user2.getFollowers().add(user1);
 
-        when(userRepository.getById(1L)).thenReturn(Optional.of(user1));
-        when(userRepository.getById(2L)).thenReturn(Optional.of(user2));
+        when(userRepository.getById(user1.getUserId())).thenReturn(Optional.of(user1));
+        when(userRepository.getById(user2.getUserId())).thenReturn(Optional.of(user2));
 
         // Act & Assert
-        assertThrows(BadRequestException.class, () -> userService.addFollower(1L, 2L));
+        assertThrows(BadRequestException.class, () -> userService.addFollower(user1.getUserId(), user2.getUserId()));
     }
 }

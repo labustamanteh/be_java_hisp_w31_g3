@@ -24,7 +24,4 @@ public class User {
     public User(){
         this.userId = ++generatedId;
     }
-    public static void resetIdCounter() {
-        generatedId = 0L;
-    }
 }
