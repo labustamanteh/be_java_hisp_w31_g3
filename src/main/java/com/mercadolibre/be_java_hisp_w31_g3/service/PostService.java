@@ -148,17 +148,21 @@ public class PostService implements IPostService {
     }
 
     private void checkProductUniqueness(PostDto postDto) {
-        Predicate<PostDto> postDtoPredicate = post -> post.getProduct().getProductName().equals(postDto.getProduct().getProductName())
+        Predicate<PostDto> postDtoPredicate = post -> post.getProduct().getProductName()
+                .equals(postDto.getProduct().getProductName())
                 && post.getProduct().getBrand().equals(postDto.getProduct().getBrand())
                 && post.getProduct().getType().equals(postDto.getProduct().getType())
                 && post.getProduct().getColor().equals(postDto.getProduct().getColor())
                 && post.getProduct().getNotes().equals(postDto.getProduct().getNotes());
 
         Optional<PostDto> exactMatch = getPostList().stream()
-                .filter(postDtoPredicate.and(post -> !post.getProduct().getProductId().equals(postDto.getProduct().getProductId()))).findFirst();
+                .filter(postDtoPredicate
+                        .and(post -> !post.getProduct().getProductId().equals(postDto.getProduct().getProductId())))
+                .findFirst();
 
         if (exactMatch.isPresent()) {
-            throw new ConflictException("Un producto con las mismas características ya existe, id: " + exactMatch.get().getProduct().getProductId());
+            throw new ConflictException("Un producto con las mismas características ya existe, id: "
+                    + exactMatch.get().getProduct().getProductId());
         }
 
         boolean hasProductWithDifferentCharacteristics = getPostList().stream()
@@ -166,7 +170,8 @@ public class PostService implements IPostService {
                 && getPostList().stream().noneMatch(postDtoPredicate);
 
         if (hasProductWithDifferentCharacteristics) {
-            throw new ConflictException("Un producto con el id ingresado con diferentes características ya existe. Ingrese un id diferente.");
+            throw new ConflictException(
+                    "Un producto con el id ingresado con diferentes características ya existe. Ingrese un id diferente.");
         }
     }
 
@@ -199,13 +204,13 @@ public class PostService implements IPostService {
         if (hasPromo != null) {
             postPredicate = p -> p.getHasPromo().equals(hasPromo);
         }
-
-        if (discount != null && discount != 0) {
-            if (discount > 1 || discount < 0) {
-                throw new BadRequestException("El valor del descuento no es válido");
-            } else {
-                postPredicate = postPredicate.and(p -> p.getDiscount().equals(discount));
-            }
+        Boolean hasDiscount = discount != null && discount != 0;
+        Boolean isValidDiscount = discount > 0 && discount <= 1;
+        if (!hasDiscount || !isValidDiscount) {
+            throw new BadRequestException("El valor del descuento no es válido");
+        }
+        if (hasDiscount && isValidDiscount) {
+            postPredicate = postPredicate.and(p -> p.getDiscount().equals(discount));
         }
 
         if (categoryId != null && categoryId != 0) {
@@ -218,4 +223,5 @@ public class PostService implements IPostService {
         }
         return postPredicate;
     }
+
 }
