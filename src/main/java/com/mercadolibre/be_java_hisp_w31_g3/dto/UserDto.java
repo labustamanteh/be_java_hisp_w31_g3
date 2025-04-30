@@ -26,12 +26,17 @@ public class UserDto {
     @JsonProperty("promo_products_count")
     private Long promoProductsCount;
 
+    @Builder.Default
     private List<UserDto> followers = null;
+
+    @Builder.Default
     private List<UserDto> followed = null;
 
+    @Builder.Default
     @JsonProperty("followers_count")
     private Long followersCount = null;
 
+    @Builder.Default
     private List<@Valid PostDto> posts = null;
 
     public UserDto(){}

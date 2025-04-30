@@ -11,7 +11,6 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 public class Product {
-    private static Long generatedId = 0L;
     @JsonProperty("product_id")
     private Long productId;
     @JsonProperty("product_name")
