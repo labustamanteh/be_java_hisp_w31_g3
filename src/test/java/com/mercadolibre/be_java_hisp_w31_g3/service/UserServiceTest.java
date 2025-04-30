@@ -98,4 +98,24 @@ public class UserServiceTest {
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId2));
     }
+
+    @Test
+    void unfollowUser_ValidUsers_FollowerRemoved() {
+        // Arrange
+        User user1 = new User();
+        User user2 = new User();
+
+        user1.setUserId(1L);
+        user1.setUserName("Jane Smith");
+        user2.setUserId(2L);
+        user2.setUserName("Alice Johnson");
+
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+
+        // Act
+        userService.unfollowUser(user1.getUserId(), user2.getUserId());
+
+        // Assert
+        verify(userRepository).unfollowUser(user1.getUserId(), user2.getUserId());
+    }
 }
