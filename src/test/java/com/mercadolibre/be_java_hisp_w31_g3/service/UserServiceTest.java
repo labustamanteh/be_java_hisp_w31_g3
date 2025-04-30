@@ -30,11 +30,11 @@ public class UserServiceTest {
     private UserService userService;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
     }
 
     @Test
-    void testAddFollower() {
+    void addFollower_ValidUsers_FollowersListUpdated() {
         // Arrange
         User user1 = new User();
         user1.setUserName("User1");
@@ -54,24 +54,24 @@ public class UserServiceTest {
         userService.addFollower(user1.getUserId(), user2.getUserId());
 
         // Assert
-        assertTrue(user2.getFollowers().contains(user1), "User1 deberia ser un seguidor de User2");
-        assertTrue(user1.getFollowed().contains(user2), "User2 deberia ser un seguidor de User1");
+        assertTrue(user2.getFollowers().contains(user1), "User1 debería ser un seguidor de User2");
+        assertTrue(user1.getFollowed().contains(user2), "User2 debería ser un seguidor de User1");
     }
 
     @Test
-    void testAddFollowerWithNullUserId() {
+    void addFollower_NullUserId_ThrowsBadRequestException() {
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(null, 2L));
     }
 
     @Test
-    void testAddFollowerWithNullUserToFollow() {
+    void addFollower_NullUserToFollow_ThrowsBadRequestException() {
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(1L, null));
     }
 
     @Test
-    void testUserCannotFollowItself() {
+    void addFollower_UserFollowItself_ThrowsBadRequestException() {
         // Arrange
         Long userId = 1L;
 
@@ -80,7 +80,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testAddFollowerUserNotFound() {
+    void addFollower_UserNotFound_ThrowsNotFoundException() {
         // Arrange
         when(userRepository.getById(anyLong())).thenReturn(Optional.empty());
 
@@ -89,11 +89,10 @@ public class UserServiceTest {
     }
 
     @Test
-    void testAddFollowerUserAlreadyFollows() {
+    void addFollower_UserAlreadyFollows_ThrowsBadRequestException() {
         // Arrange
         User user1 = new User();
         User user2 = new User();
-
         user1.getFollowed().add(user2);
 
         when(userRepository.getById(user1.getUserId())).thenReturn(Optional.of(user1));
