@@ -105,17 +105,15 @@ public class UserServiceTest {
         User user1 = new User();
         User user2 = new User();
 
-        user1.setUserId(1L);
-        user1.setUserName("Jane Smith");
-        user2.setUserId(2L);
-        user2.setUserName("Alice Johnson");
+        long userId1 = user1.getUserId();
+        long userId2 = user2.getUserId();
 
         when(userRepository.isAnyMatch(any())).thenReturn(true);
 
         // Act
-        userService.unfollowUser(user1.getUserId(), user2.getUserId());
+        userService.unfollowUser(userId1, userId2);
 
         // Assert
-        verify(userRepository).unfollowUser(user1.getUserId(), user2.getUserId());
+        verify(userRepository).unfollowUser(userId1, userId2);
     }
 }
