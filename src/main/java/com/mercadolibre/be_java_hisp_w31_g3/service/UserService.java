@@ -2,13 +2,12 @@ package com.mercadolibre.be_java_hisp_w31_g3.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
-import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
+import com.mercadolibre.be_java_hisp_w31_g3.util.UserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
@@ -18,7 +17,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService implements IUserService {
@@ -40,49 +38,8 @@ public class UserService implements IUserService {
         }
 
         return userList.stream()
-                .map(user ->
-                        UserDto
-                                .builder()
-                                .userId(user.getUserId())
-                                .userName(user.getUserName())
-                                .followers(user.getFollowers().stream()
-                                        .map(followers ->
-                                                UserDto
-                                                        .builder()
-                                                        .userName(followers.getUserName())
-                                                        .userId(followers.getUserId())
-                                                        .build())
-                                        .collect(Collectors.toList())
-                                )
-                                .followed(
-                                        user.getFollowed().stream()
-                                                .map(followed ->
-                                                        UserDto
-                                                                .builder()
-                                                                .userName(followed.getUserName())
-                                                                .userId(followed.getUserId())
-                                                                .build())
-                                                .collect(Collectors.toList())
-                                )
-                                .posts(
-                                        user.getPosts().stream()
-                                                .map(post ->
-                                                        PostDto
-                                                                .builder()
-                                                                .postId(post.getPostId())
-                                                                .userId(post.getUserId())
-                                                                .date(post.getDate().toString())
-                                                                .product(ProductDto
-                                                                        .builder()
-                                                                        .productName(post.getProduct().getProductName())
-                                                                        .build())
-                                                                .build()
-                                                )
-                                                .collect(Collectors.toList())
-                                )
-                                .build()
-                )
-                .collect(Collectors.toList());
+                .map(UserMapper::getUserDto)
+                .toList();
     }
 
     @Override
@@ -111,11 +68,9 @@ public class UserService implements IUserService {
 
     @Override
     public UserDto getFollowersCount(Long userId) {
-        Optional<User> optionalUser = userRepository.getById(userId);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("No se encontró el usuario con el id ingresado");
-        }
-        User user = optionalUser.get();
+        checkUserExists(userId);
+
+        User user = userRepository.getById(userId).get();
         Long followersCount = (long) user.getFollowers().size();
         return UserDto.builder()
                 .userId(user.getUserId())
@@ -126,13 +81,9 @@ public class UserService implements IUserService {
 
     @Override
     public UserDto getFollowersById(Long id, String order) {
-        Optional<User> optionalUser = userRepository.getById(id);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("No existe el usuario con el id ingresado");
-        }
+        checkUserExists(id);
 
-        User user = optionalUser.get();
-
+        User user = userRepository.getById(id).get();
         List<User> orderedFollowers = getUserListOrderedByName(order, user.getFollowers());
         List<UserDto> orderedFollowersDtos = orderedFollowers.stream().map(
                         u -> UserDto.builder()
@@ -150,10 +101,9 @@ public class UserService implements IUserService {
 
     @Override
     public UserDto getFollowedList(Long id, String order) {
-        Optional<User> user = userRepository.getById(id);
-        if (user.isEmpty())
-            throw new NotFoundException("Error, no se encontró un usuario con el Id enviado.");
+        checkUserExists(id);
 
+        Optional<User> user = userRepository.getById(id);
         List<User> orderedFollowed = getUserListOrderedByName(order, user.get().getFollowed());
         List<UserDto> userList = orderedFollowed.stream().map(
                 u -> UserDto.builder()
@@ -170,12 +120,9 @@ public class UserService implements IUserService {
 
     @Override
     public void unfollowUser(Long userId, Long userIdToUnfollow) {
-        if(!userRepository.isAnyMatch(user -> user.getUserId().equals(userId))){
-            throw new BadRequestException("El usuario no se encontró");
-        }
-        if(!userRepository.isAnyMatch(user -> user.getUserId().equals(userIdToUnfollow))){
-            throw new BadRequestException("El usuario a dejar de seguir no se encontró");
-        }
+        checkUserExists(userId);
+        checkUserExists(userIdToUnfollow);
+
         userRepository.unfollowUser(userId, userIdToUnfollow);
     }
 
@@ -191,6 +138,11 @@ public class UserService implements IUserService {
         return userList;
     }
 
+    private void checkUserExists(Long userId) {
+        if (!userRepository.isAnyMatch(user -> user.getUserId().equals(userId))) {
+            throw new NotFoundException("No se encontró el usuario con el id ingresado");
+        }
+    }
 
     private void loadDataBase() {
         try {
