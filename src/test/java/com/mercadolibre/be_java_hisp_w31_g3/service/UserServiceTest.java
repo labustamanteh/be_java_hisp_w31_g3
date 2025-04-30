@@ -30,7 +30,7 @@ public class UserServiceTest {
     private UserService userService;
 
     @BeforeEach
-    void setUp(){}
+    void setUp(){User.resetIdCounter();}
 
     @Test
     void testAddFollower() {
@@ -94,6 +94,7 @@ public class UserServiceTest {
         User user2 = new User();
 
         user1.getFollowed().add(user2);
+        //user2.getFollowers().add(user1);
 
         when(userRepository.getById(1L)).thenReturn(Optional.of(user1));
         when(userRepository.getById(2L)).thenReturn(Optional.of(user2));
@@ -101,5 +102,4 @@ public class UserServiceTest {
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(1L, 2L));
     }
-
 }
