@@ -46,9 +46,11 @@ public class PostDto implements Serializable {
     @JsonProperty(required = true)
     private Double price;
 
+    @Builder.Default
     @JsonProperty(value = "has_promo")
     private Boolean hasPromo = false;
 
+    @Builder.Default
     @Max(value = 1, message = "El descuento no puede ser mayor a 1")
     @Min(value = 0, message = "El descuento no puede ser menor a 0")
     private Double discount = 0D;
