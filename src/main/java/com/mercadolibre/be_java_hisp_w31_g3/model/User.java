@@ -3,7 +3,6 @@ package com.mercadolibre.be_java_hisp_w31_g3.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +12,6 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-@Builder
 public class User {
     private static Long generatedId = 0L;
     private Long userId;
