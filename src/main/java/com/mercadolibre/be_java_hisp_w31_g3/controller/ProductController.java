@@ -2,6 +2,7 @@ package com.mercadolibre.be_java_hisp_w31_g3.controller;
 
 import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
 import com.mercadolibre.be_java_hisp_w31_g3.service.IPostService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,13 +35,13 @@ public class ProductController {
     }
 
     @PostMapping("/post")
-    public ResponseEntity<Void> addPost(@RequestBody PostDto postDto) {
+    public ResponseEntity<Void> addPost(@RequestBody @Valid PostDto postDto) {
         postService.addPost(postDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping("/promo-post")
-    public ResponseEntity<Void> createPromoPost(@RequestBody PostDto postDto){
+    public ResponseEntity<Void> createPromoPost(@RequestBody @Valid PostDto postDto){
         postService.addPost(postDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

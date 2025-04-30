@@ -1,6 +1,5 @@
 package com.mercadolibre.be_java_hisp_w31_g3.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
@@ -22,40 +21,26 @@ import java.util.function.Predicate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PostService implements IPostService {
     private final IUserRepository userRepository;
-    private final ObjectMapper mapper;
 
     @Override
     public UserDto getPostFollowed(Long id, String order) {
-        Optional<User> user = userRepository.getById(id);
-        if (user.isEmpty())
-            throw new NotFoundException("No se encontró un usuario con el Id enviado.");
+        checkUserExists(id);
+
         LocalDate date = LocalDate.now().minusWeeks(2);
+        Optional<User> user = userRepository.getById(id);
 
         List<PostDto> posts = user.get().getFollowed().stream()
                 .flatMap(u -> u.getPosts().stream()
                         .filter(post -> post.getDate().isAfter(date))
-                        .map(PostMapper::converToPostDto))
-                        .collect(Collectors.toList());
+                        .map(PostMapper::convertToPostDto))
+                .toList();
 
         return UserDto.builder().userId(id).posts(getPostListOrderedByDate(order, posts)).build();
-    }
-
-    private List<PostDto> getPostListOrderedByDate(String order, List<PostDto> postList) {
-        switch (order) {
-            case "date_asc":
-                postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate)).toList();
-                break;
-            case "date_desc":
-                postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate).reversed()).toList();
-                break;
-        }
-        return postList;
     }
 
     @Override
@@ -70,84 +55,15 @@ public class PostService implements IPostService {
         userRepository.addPost(postDto.getUserId(), post);
     }
 
-    private void validatePostDate(String date) {
-        if (date.trim().isEmpty()) {
-            throw new BadRequestException("La fecha no puede estar vacía");
-        }
-
-        try {
-            LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        } catch (DateTimeException e) {
-            throw new BadRequestException("La fecha no está en el formato adecuado dd-MM-yyyy");
-        } catch (Exception e) {
-            throw new BadRequestException("Error: " + e.getMessage());
-        }
-    }
-
-    private void checkUserExists(Long userId) {
-        if (!userRepository.isAnyMatch(user -> user.getUserId().equals(userId))) {
-            throw new NotFoundException("No se encontró el usuario con el id ingresado");
-        }
-    }
-
-    private void checkProductUniqueness(PostDto postDto) {
-        Predicate<PostDto> postDtoPredicate = post -> post.getProduct().getProductName().equals(postDto.getProduct().getProductName())
-                && post.getProduct().getBrand().equals(postDto.getProduct().getBrand())
-                && post.getProduct().getType().equals(postDto.getProduct().getType())
-                && post.getProduct().getColor().equals(postDto.getProduct().getColor())
-                && post.getProduct().getNotes().equals(postDto.getProduct().getNotes());
-
-        Optional<PostDto> exactMatch = getPostList().stream()
-                .filter(postDtoPredicate.and(post -> !post.getProduct().getProductId().equals(postDto.getProduct().getProductId()))).findFirst();
-
-        if (exactMatch.isPresent()) {
-            throw new ConflictException("Un producto con las mismas características ya existe, id: " + exactMatch.get().getProduct().getProductId());
-        }
-
-        boolean hasProductWithDifferentCharacteristics = getPostList().stream()
-                .anyMatch(post -> post.getProduct().getProductId().equals(postDto.getProduct().getProductId()))
-                && getPostList().stream().noneMatch(postDtoPredicate);
-
-        if (hasProductWithDifferentCharacteristics) {
-            throw new ConflictException("Un producto con el id ingresado con diferentes características ya existe. Ingrese un id diferente.");
-        }
-    }
-
-    private Post createPost(PostDto postDto, ProductDto productDto) {
-        LocalDate formattedDate = LocalDate.parse(postDto.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        Product product = Product.builder()
-                .productId(productDto.getProductId())
-                .productName(productDto.getProductName())
-                .type(productDto.getType())
-                .brand(productDto.getBrand())
-                .color(productDto.getColor())
-                .notes(productDto.getNotes())
-                .build();
-
-        return Post.builder()
-                .postId(Post.getGeneratedId())
-                .price(postDto.getPrice())
-                .date(formattedDate)
-                .categoryId(postDto.getCategoryId())
-                .userId(postDto.getUserId())
-                .product(product)
-                .hasPromo(postDto.getHasPromo())
-                .discount(postDto.getDiscount())
-                .build();
-    }
 
     @Override
     public UserDto getPromoPostByUserId(Long userId) {
-        Optional<User> userOptional = userRepository.getById(userId);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        if (userOptional.isEmpty()) {
-            throw new NotFoundException("Usuario no encontrado");
-        }
+        checkUserExists(userId);
 
-        User user = userOptional.get();
+        User user = userRepository.getById(userId).get();
         List<PostDto> promoPosts = user.getPosts().stream()
                 .filter(Post::getHasPromo)
-                .map(PostMapper::converToPostDto)
+                .map(PostMapper::convertToPostDto)
                 .toList();
 
         if (promoPosts.isEmpty()) {
@@ -164,16 +80,14 @@ public class PostService implements IPostService {
     public List<PostDto> getPostList(){
         return userRepository.getAll().stream()
                 .flatMap(user -> user.getPosts().stream())
-                .map(PostMapper::converToPostDto).toList();
+                .map(PostMapper::convertToPostDto).toList();
     }
 
     @Override
     public UserDto getPromoPostCount(Long userId) {
-        Optional<User> optionalUser = userRepository.getById(userId);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("No se encontró el usuario con el id ingresado");
-        }
-        User user = optionalUser.get();
+        checkUserExists(userId);
+
+        User user = userRepository.getById(userId).get();
         Long postWithPromoCount = user.getPosts().stream().filter(Post::getHasPromo).count();
 
         return UserDto.builder()
@@ -201,19 +115,102 @@ public class PostService implements IPostService {
         return postDtos;
     }
 
+    private List<PostDto> getPostListOrderedByDate(String order, List<PostDto> postList) {
+        switch (order) {
+            case "date_asc":
+                postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate)).toList();
+                break;
+            case "date_desc":
+                postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate).reversed()).toList();
+                break;
+        }
+        return postList;
+    }
+
+    private void validatePostDate(String date) {
+        if (date.trim().isEmpty()) {
+            throw new BadRequestException("La fecha no puede estar vacía");
+        }
+
+        try {
+            LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        } catch (DateTimeException e) {
+            throw new BadRequestException("La fecha no está en el formato adecuado dd-MM-yyyy");
+        } catch (Exception e) {
+            throw new BadRequestException("Error: " + e.getMessage());
+        }
+    }
+
+    private void checkUserExists(Long userId) {
+        if (!userRepository.isAnyMatch(user -> user.getUserId().equals(userId))) {
+            throw new NotFoundException("No se encontró el usuario con el id ingresado");
+        }
+    }
+
+    private void checkProductUniqueness(PostDto postDto) {
+        Predicate<PostDto> postDtoPredicate = post -> post.getProduct().getProductName()
+                .equals(postDto.getProduct().getProductName())
+                && post.getProduct().getBrand().equals(postDto.getProduct().getBrand())
+                && post.getProduct().getType().equals(postDto.getProduct().getType())
+                && post.getProduct().getColor().equals(postDto.getProduct().getColor())
+                && post.getProduct().getNotes().equals(postDto.getProduct().getNotes());
+
+        Optional<PostDto> exactMatch = getPostList().stream()
+                .filter(postDtoPredicate
+                        .and(post -> !post.getProduct().getProductId().equals(postDto.getProduct().getProductId())))
+                .findFirst();
+
+        if (exactMatch.isPresent()) {
+            throw new ConflictException("Un producto con las mismas características ya existe, id: "
+                    + exactMatch.get().getProduct().getProductId());
+        }
+
+        boolean hasProductWithDifferentCharacteristics = getPostList().stream()
+                .anyMatch(post -> post.getProduct().getProductId().equals(postDto.getProduct().getProductId()))
+                && getPostList().stream().noneMatch(postDtoPredicate);
+
+        if (hasProductWithDifferentCharacteristics) {
+            throw new ConflictException(
+                    "Un producto con el id ingresado con diferentes características ya existe. Ingrese un id diferente.");
+        }
+    }
+
+    private Post createPost(PostDto postDto, ProductDto productDto) {
+        LocalDate formattedDate = LocalDate.parse(postDto.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        Product product = Product.builder()
+                .productId(productDto.getProductId())
+                .productName(productDto.getProductName())
+                .type(productDto.getType())
+                .brand(productDto.getBrand())
+                .color(productDto.getColor())
+                .notes(productDto.getNotes())
+                .build();
+
+        return Post.builder()
+                .postId(Post.getGeneratedId())
+                .price(postDto.getPrice())
+                .date(formattedDate)
+                .categoryId(postDto.getCategoryId())
+                .userId(postDto.getUserId())
+                .product(product)
+                .hasPromo(postDto.getHasPromo())
+                .discount(postDto.getDiscount())
+                .build();
+    }
+
     private static Predicate<PostDto> createPostFilterPredicate(Double discount, Long categoryId, String color, Boolean hasPromo) {
         Predicate<PostDto> postPredicate = p -> true;
 
         if (hasPromo != null) {
             postPredicate = p -> p.getHasPromo().equals(hasPromo);
         }
-
-        if (discount != null && discount != 0) {
-            if (discount > 1 || discount < 0) {
-                throw new BadRequestException("El valor del descuento no es válido");
-            } else {
-                postPredicate = postPredicate.and(p -> p.getDiscount().equals(discount));
-            }
+        Boolean hasDiscount = discount != null && discount != 0;
+        Boolean isValidDiscount = discount > 0 && discount <= 1;
+        if (!hasDiscount || !isValidDiscount) {
+            throw new BadRequestException("El valor del descuento no es válido");
+        }
+        if (hasDiscount && isValidDiscount) {
+            postPredicate = postPredicate.and(p -> p.getDiscount().equals(discount));
         }
 
         if (categoryId != null && categoryId != 0) {
@@ -226,4 +223,5 @@ public class PostService implements IPostService {
         }
         return postPredicate;
     }
+
 }
