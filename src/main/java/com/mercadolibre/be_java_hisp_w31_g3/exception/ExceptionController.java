@@ -2,10 +2,16 @@ package com.mercadolibre.be_java_hisp_w31_g3.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.mercadolibre.be_java_hisp_w31_g3.dto.ExceptionDto;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class ExceptionController {
@@ -27,4 +33,17 @@ public class ExceptionController {
         return new ResponseEntity<>(exceptionDto, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<ExceptionDto> handleValidationExceptions(MethodArgumentNotValidException e) {
+
+        Map<String, List<String>> errors = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        FieldError::getField,
+                        Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())
+                ));
+        ExceptionDto error = new ExceptionDto(errors);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 }
