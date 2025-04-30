@@ -1,6 +1,8 @@
 package com.mercadolibre.be_java_hisp_w31_g3.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
+import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -54,5 +57,49 @@ public class UserServiceTest {
         assertTrue(user1.getFollowed().contains(user2), "User2 deberia ser un seguidor de User1");
     }
 
+    @Test
+    void testAddFollowerWithNullUserId() {
+        // Act & Assert
+        assertThrows(BadRequestException.class, () -> userService.addFollower(null, 2L));
+    }
+
+    @Test
+    void testAddFollowerWithNullUserToFollow() {
+        // Act & Assert
+        assertThrows(BadRequestException.class, () -> userService.addFollower(1L, null));
+    }
+
+    @Test
+    void testUserCannotFollowItself() {
+        // Arrange
+        Long userId = 1L;
+
+        // Act & Assert
+        assertThrows(BadRequestException.class, () -> userService.addFollower(userId, userId));
+    }
+
+    @Test
+    void testAddFollowerUserNotFound() {
+        // Arrange
+        when(userRepository.getById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> userService.addFollower(1L, 2L));
+    }
+
+    @Test
+    void testAddFollowerUserAlreadyFollows() {
+        // Arrange
+        User user1 = new User();
+        User user2 = new User();
+
+        user1.getFollowed().add(user2);
+
+        when(userRepository.getById(1L)).thenReturn(Optional.of(user1));
+        when(userRepository.getById(2L)).thenReturn(Optional.of(user2));
+
+        // Act & Assert
+        assertThrows(BadRequestException.class, () -> userService.addFollower(1L, 2L));
+    }
 
 }
