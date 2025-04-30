@@ -116,4 +116,47 @@ public class UserServiceTest {
         // Assert
         verify(userRepository).unfollowUser(userId1, userId2);
     }
+
+    @Test
+    void unfollowUser_UserNotFound_ThrowsNotFoundException() {
+        // Arrange
+        when(userRepository.isAnyMatch(any())).thenReturn(false);// Ningún usuario encontrado
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> userService.unfollowUser(1L, 2L));
+    }
+
+    @Test
+    void unfollowUser_UserNotInFollowersList_NoActionNeeded() {
+        // Arrange
+        User user1 = new User();
+        User user2 = new User();
+        long userId1 = user1.getUserId();
+        long userId2 = user2.getUserId();
+
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+        // Act
+        userService.unfollowUser(userId1, userId2);
+
+        // Assert
+        assertFalse(user1.getFollowed().contains(user2));
+        assertFalse(user2.getFollowers().contains(user1));
+    }
+
+    @Test
+    void unfollowUser_UserUnfollowItself_NoOperation() {
+        // Arrange
+        User user = new User();
+        long userId = user.getUserId();
+
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+        // Act
+        userService.unfollowUser(userId, userId);
+
+        // Assert
+        verify(userRepository).unfollowUser(userId, userId);
+
+        assertTrue(user.getFollowed().isEmpty());
+        assertTrue(user.getFollowers().isEmpty());
+    }
 }
