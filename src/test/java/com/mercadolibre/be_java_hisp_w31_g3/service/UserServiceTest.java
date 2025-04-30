@@ -40,11 +40,19 @@ public class UserServiceTest {
         when(userRepository.getById(1L)).thenReturn(Optional.of(user1));
         when(userRepository.getById(2L)).thenReturn(Optional.of(user2));
 
+        doAnswer(invocation -> {
+            user1.getFollowed().add(user2);
+            user2.getFollowers().add(user1);
+            return null;
+        }).when(userRepository).addFollower(1L, 2L);
+
         // Act
         userService.addFollower(1L, 2L);
 
         // Assert
-        assertTrue(user2.getFollowers().contains(user1));
-        assertTrue(user1.getFollowed().contains(user2));
+        assertTrue(user2.getFollowers().contains(user1), "User1 deberia ser un seguidor de User2");
+        assertTrue(user1.getFollowed().contains(user2), "User2 deberia ser un seguidor de User1");
     }
+
+
 }
