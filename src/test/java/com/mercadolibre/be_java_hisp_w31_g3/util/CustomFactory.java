@@ -20,6 +20,7 @@ public class CustomFactory {
                 .build();
 
         return Post.builder()
+                .postId(Post.getGeneratedId())
                 .userId(userId)
                 .date(promoDate)
                 .product(product)

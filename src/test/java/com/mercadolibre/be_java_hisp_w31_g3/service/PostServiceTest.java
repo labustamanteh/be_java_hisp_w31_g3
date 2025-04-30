@@ -32,7 +32,7 @@ public class PostServiceTest {
 
     @Test
     public void getPostFollowed_FollowedWithOnePostFromLastTwoWeeks_ReturnsOnePostFromFollowed(){
-        // Arrange - Given
+        // Arrange
         LocalDate date1 = Instant.now().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate date2 = LocalDate.now().minusWeeks(4);
         User user = CustomFactory.getUserWithFollowedWithTwoPosts(date1, date2);
@@ -40,10 +40,10 @@ public class PostServiceTest {
         when(userRepository.isAnyMatch(any())).thenReturn(true);
         when(userRepository.getById(userId)).thenReturn(Optional.of(user));
 
-        // Act - When
+        // Act
         UserDto response = postService.getPostFollowed(userId, "");
 
-        // Assert - Then
+        // Assert
         assertNotNull(response);
         assertEquals(1, response.getPosts().size());
 
@@ -54,7 +54,7 @@ public class PostServiceTest {
 
     @Test
     public void getPostFollowed_FollowedWithTwoPostsLongerThanTwoWeeks_ReturnsNoPostsFromFollowed(){
-        // Arrange - Given
+        // Arrange
         LocalDate date1 = LocalDate.now().minusWeeks(6);
         LocalDate date2 = LocalDate.now().minusWeeks(4);
         User user = CustomFactory.getUserWithFollowedWithTwoPosts(date1, date2);
@@ -62,17 +62,17 @@ public class PostServiceTest {
         when(userRepository.isAnyMatch(any())).thenReturn(true);
         when(userRepository.getById(userId)).thenReturn(Optional.of(user));
 
-        // Act - When
+        // Act
         UserDto response = postService.getPostFollowed(userId, "");
 
-        // Assert - Then
+        // Assert
         assertNotNull(response);
         assertEquals(0, response.getPosts().size());
     }
 
     @Test
     public void getPostFollowed_FollowedWithTwoPostsInThePastTwoWeeks_ReturnsTwoPostsFromFollowedOrderedAsc(){
-        // Arrange - Given
+        // Arrange
         LocalDate date1 = LocalDate.now().minusDays(3);
         LocalDate date2 = LocalDate.now().minusWeeks(1);
         User user = CustomFactory.getUserWithFollowedWithTwoPosts(date1, date2);
@@ -81,18 +81,22 @@ public class PostServiceTest {
         when(userRepository.getById(userId)).thenReturn(Optional.of(user));
         List<PostDto> expectedPosts = PostMapper.convertPostsToDtos(user.getFollowed().get(0).getPosts());
 
-        // Act - When
+        // Act
         UserDto response = postService.getPostFollowed(userId, "date_asc");
 
-        // Assert - Then
+        // Assert
         assertNotNull(response);
         assertEquals(2, response.getPosts().size());
         assertEquals(expectedPosts.get(0).getDate(), response.getPosts().get(1).getDate());
+        response.getPosts().forEach(p -> {
+            LocalDate responsePostLocalDate = LocalDate.parse(p.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            assertTrue(responsePostLocalDate.isAfter(LocalDate.now().minusWeeks(2)));
+        });
     }
 
     @Test
     public void getPostFollowed_FollowedWithTwoPostsInThePastTwoWeeks_ReturnsTwoPostsFromFollowedOrderedDesc(){
-        // Arrange - Given
+        // Arrange
         LocalDate date1 = LocalDate.now().minusDays(3);
         LocalDate date2 = LocalDate.now().minusWeeks(1);
         User user = CustomFactory.getUserWithFollowedWithTwoPosts(date1, date2);
@@ -101,12 +105,16 @@ public class PostServiceTest {
         when(userRepository.getById(userId)).thenReturn(Optional.of(user));
         List<PostDto> expectedPosts = PostMapper.convertPostsToDtos(user.getFollowed().get(0).getPosts());
 
-        // Act - When
+        // Act
         UserDto response = postService.getPostFollowed(userId, "date_desc");
 
-        // Assert - Then
+        // Assert
         assertNotNull(response);
         assertEquals(2, response.getPosts().size());
         assertEquals(expectedPosts.get(0).getDate(), response.getPosts().get(0).getDate());
+        response.getPosts().forEach(p -> {
+            LocalDate responsePostLocalDate = LocalDate.parse(p.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            assertTrue(responsePostLocalDate.isAfter(LocalDate.now().minusWeeks(2)));
+        });
     }
 }
