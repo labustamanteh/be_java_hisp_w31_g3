@@ -58,10 +58,6 @@ public class UserRepository implements IUserRepository {
         return users;
     }
 
-//    public List<User> getAllByPredicate(Predicate<User> predicate) {
-//        return users.stream().filter(predicate).toList();
-//    }
-//
     @Override
     public Boolean isAnyMatch(Predicate<User> predicate) {
         return users.stream().anyMatch(predicate);

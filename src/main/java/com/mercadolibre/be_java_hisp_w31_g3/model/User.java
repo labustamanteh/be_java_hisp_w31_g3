@@ -1,7 +1,6 @@
 package com.mercadolibre.be_java_hisp_w31_g3.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 

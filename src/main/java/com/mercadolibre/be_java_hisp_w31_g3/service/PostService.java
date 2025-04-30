@@ -1,6 +1,5 @@
 package com.mercadolibre.be_java_hisp_w31_g3.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
@@ -22,20 +21,18 @@ import java.util.function.Predicate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PostService implements IPostService {
     private final IUserRepository userRepository;
-    private final ObjectMapper mapper;
 
     @Override
     public UserDto getPostFollowed(Long id, String order) {
-        Optional<User> user = userRepository.getById(id);
-        if (user.isEmpty())
-            throw new NotFoundException("No se encontró un usuario con el Id enviado.");
+        checkUserExists(id);
+
         LocalDate date = LocalDate.now().minusWeeks(2);
+        Optional<User> user = userRepository.getById(id);
 
         List<PostDto> posts = user.get().getFollowed().stream()
                 .flatMap(u -> u.getPosts().stream()
@@ -44,18 +41,6 @@ public class PostService implements IPostService {
                 .toList();
 
         return UserDto.builder().userId(id).posts(getPostListOrderedByDate(order, posts)).build();
-    }
-
-    private List<PostDto> getPostListOrderedByDate(String order, List<PostDto> postList) {
-        switch (order) {
-            case "date_asc":
-                postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate)).toList();
-                break;
-            case "date_desc":
-                postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate).reversed()).toList();
-                break;
-        }
-        return postList;
     }
 
     @Override
@@ -68,6 +53,78 @@ public class PostService implements IPostService {
         Post post = createPost(postDto, productDto);
 
         userRepository.addPost(postDto.getUserId(), post);
+    }
+
+
+    @Override
+    public UserDto getPromoPostByUserId(Long userId) {
+        checkUserExists(userId);
+
+        User user = userRepository.getById(userId).get();
+        List<PostDto> promoPosts = user.getPosts().stream()
+                .filter(Post::getHasPromo)
+                .map(PostMapper::convertToPostDto)
+                .toList();
+
+        if (promoPosts.isEmpty()) {
+            throw new NotFoundException("No hay Productos en promoción");
+        }
+
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .posts(promoPosts).build();
+    }
+
+    @Override
+    public List<PostDto> getPostList(){
+        return userRepository.getAll().stream()
+                .flatMap(user -> user.getPosts().stream())
+                .map(PostMapper::convertToPostDto).toList();
+    }
+
+    @Override
+    public UserDto getPromoPostCount(Long userId) {
+        checkUserExists(userId);
+
+        User user = userRepository.getById(userId).get();
+        Long postWithPromoCount = user.getPosts().stream().filter(Post::getHasPromo).count();
+
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .promoProductsCount(postWithPromoCount).build();
+    }
+
+    @Override
+    public List<PostDto> getPostsByFilter(Double discount, Long categoryId, String color, Boolean hasPromo) {
+        if (discount == null && categoryId == null && color.isEmpty() && hasPromo == null) {
+            return getPostList();
+        }
+
+        Predicate<PostDto> postPredicate = createPostFilterPredicate(discount, categoryId, color, hasPromo);
+
+        List<PostDto> postDtos = getPostList().stream()
+                                .filter(postPredicate)
+                                .toList();
+
+        if (postDtos.isEmpty()) {
+            throw new NotFoundException("No se encontraron publicaciones con el filtro proporcionado.");
+        }
+
+        return postDtos;
+    }
+
+    private List<PostDto> getPostListOrderedByDate(String order, List<PostDto> postList) {
+        switch (order) {
+            case "date_asc":
+                postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate)).toList();
+                break;
+            case "date_desc":
+                postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate).reversed()).toList();
+                break;
+        }
+        return postList;
     }
 
     private void validatePostDate(String date) {
@@ -134,70 +191,6 @@ public class PostService implements IPostService {
                 .hasPromo(postDto.getHasPromo())
                 .discount(postDto.getDiscount())
                 .build();
-    }
-
-    @Override
-    public UserDto getPromoPostByUserId(Long userId) {
-        Optional<User> userOptional = userRepository.getById(userId);
-        if (userOptional.isEmpty()) {
-            throw new NotFoundException("Usuario no encontrado");
-        }
-
-        User user = userOptional.get();
-        List<PostDto> promoPosts = user.getPosts().stream()
-                .filter(Post::getHasPromo)
-                .map(PostMapper::convertToPostDto)
-                .toList();
-
-        if (promoPosts.isEmpty()) {
-            throw new NotFoundException("No hay Productos en promoción");
-        }
-
-        return UserDto.builder()
-                .userId(user.getUserId())
-                .userName(user.getUserName())
-                .posts(promoPosts).build();
-    }
-
-    @Override
-    public List<PostDto> getPostList(){
-        return userRepository.getAll().stream()
-                .flatMap(user -> user.getPosts().stream())
-                .map(PostMapper::convertToPostDto).toList();
-    }
-
-    @Override
-    public UserDto getPromoPostCount(Long userId) {
-        Optional<User> optionalUser = userRepository.getById(userId);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("No se encontró el usuario con el id ingresado");
-        }
-        User user = optionalUser.get();
-        Long postWithPromoCount = user.getPosts().stream().filter(Post::getHasPromo).count();
-
-        return UserDto.builder()
-                .userId(user.getUserId())
-                .userName(user.getUserName())
-                .promoProductsCount(postWithPromoCount).build();
-    }
-
-    @Override
-    public List<PostDto> getPostsByFilter(Double discount, Long categoryId, String color, Boolean hasPromo) {
-        if (discount == null && categoryId == null && color.isEmpty() && hasPromo == null) {
-            return getPostList();
-        }
-
-        Predicate<PostDto> postPredicate = createPostFilterPredicate(discount, categoryId, color, hasPromo);
-
-        List<PostDto> postDtos = getPostList().stream()
-                                .filter(postPredicate)
-                                .toList();
-
-        if (postDtos.isEmpty()) {
-            throw new NotFoundException("No se encontraron publicaciones con el filtro proporcionado.");
-        }
-
-        return postDtos;
     }
 
     private static Predicate<PostDto> createPostFilterPredicate(Double discount, Long categoryId, String color, Boolean hasPromo) {
