@@ -7,6 +7,8 @@ import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.UserRepository;
+import com.mercadolibre.be_java_hisp_w31_g3.util.CustomFactory;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -111,8 +113,7 @@ public class UserServiceTest {
         // arrange
         Long userId = 2L;
         when(userRepository.isAnyMatch(any())).thenReturn(true);
-        User user = new User(userId, "Lady", List.of(new User(), new User()), new ArrayList<User>(),
-                new ArrayList<Post>());
+        User user = CustomFactory.getFollowersCount(userId);
         Optional<User> optionalUser = Optional.of(user);
         when(userRepository.getById(Mockito.anyLong())).thenReturn(optionalUser);
 
