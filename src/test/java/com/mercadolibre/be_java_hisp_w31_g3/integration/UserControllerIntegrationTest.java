@@ -29,12 +29,9 @@ public class UserControllerIntegrationTest {
     private UserRepository userRepository;
 
     @BeforeEach
-    void SetUp () {
+    void setUp () {
         userRepository.getAll().clear();
-    }
 
-    @Test
-    public void testAddFollower_Success() throws Exception {
         User user1 = new User();
         user1.setUserId(1L);
 
@@ -43,7 +40,10 @@ public class UserControllerIntegrationTest {
 
         userRepository.add(user1);
         userRepository.add(user2);
+    }
 
+    @Test
+    public void testAddFollower_Success() throws Exception {
         mockMvc.perform(post("/users/1/follow/2")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
@@ -53,11 +53,6 @@ public class UserControllerIntegrationTest {
 
     @Test
     public void testAddFollower_InvalidUserId_ThrowsException() throws Exception {
-        User user1 = new User();
-        user1.setUserId(1L);
-
-        userRepository.add(user1);
-
         mockMvc.perform(post("/users/1/follow/99")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
@@ -67,14 +62,7 @@ public class UserControllerIntegrationTest {
 
     @Test
     public void testUnfollowUser_Success() throws Exception {
-        User user1 = new User();
-        user1.setUserId(1L);
-
-        User user2 = new User();
-        user2.setUserId(2L);
-        userRepository.add(user1);
-        userRepository.add(user2);
-
+        // Primero aseguramos que el usuario1 sigue al usuario2
         mockMvc.perform(post("/users/1/follow/2")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -88,11 +76,6 @@ public class UserControllerIntegrationTest {
 
     @Test
     public void testUnfollowUser_InvalidUserId_ThrowsException() throws Exception {
-        User user1 = new User();
-        user1.setUserId(1L);
-
-        userRepository.add(user1);
-
         mockMvc.perform(put("/users/1/unfollow/99")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
