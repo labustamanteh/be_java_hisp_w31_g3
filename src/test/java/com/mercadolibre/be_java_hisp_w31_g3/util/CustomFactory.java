@@ -42,11 +42,4 @@ public class CustomFactory {
         userInFollowed.getFollowers().add(user);
         return user;
     }
-
-    public static User getUserWithIdAndName(Long userId, String userName) {
-        User user = new User();
-        user.setUserId(userId);
-        user.setUserName(userName);
-        return user;
-    }
 }
