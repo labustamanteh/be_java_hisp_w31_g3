@@ -120,7 +120,7 @@ public class UserServiceTest {
     @Test
     void unfollowUser_UserNotFound_ThrowsNotFoundException() {
         // Arrange
-        when(userRepository.isAnyMatch(any())).thenReturn(false);// Ningún usuario encontrado
+        when(userRepository.isAnyMatch(any())).thenReturn(false);
 
         // Act & Assert
         assertThrows(NotFoundException.class, () -> userService.unfollowUser(1L, 2L));
