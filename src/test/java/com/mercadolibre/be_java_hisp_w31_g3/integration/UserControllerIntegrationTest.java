@@ -3,6 +3,7 @@ package com.mercadolibre.be_java_hisp_w31_g3.integration;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.UserRepository;
 import com.mercadolibre.be_java_hisp_w31_g3.service.PostService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +27,18 @@ public class UserControllerIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private PostService postService;
 
+    @BeforeEach
+    void SetUp () {
+        userRepository.getAll().clear();
+    }
     @Test
     public void testAddFollower_Success() throws Exception {
         User user1 = new User();
         user1.setUserId(1L);
-        user1.setUserName("User1");
 
         User user2 = new User();
         user2.setUserId(2L);
-        user2.setUserName("User2");
 
         userRepository.add(user1);
         userRepository.add(user2);
@@ -48,14 +49,24 @@ public class UserControllerIntegrationTest {
     }
 
     @Test
+    public void testAddFollower_InvalidUserId_ThrowsException() throws Exception {
+        User user1 = new User();
+        user1.setUserId(1L);
+
+        userRepository.add(user1);
+
+        mockMvc.perform(post("/users/1/follow/99")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void testUnfollowUser_Success() throws Exception {
         User user1 = new User();
         user1.setUserId(1L);
-        user1.setUserName("User1");
 
         User user2 = new User();
         user2.setUserId(2L);
-        user2.setUserName("User2");
         userRepository.add(user1);
         userRepository.add(user2);
 
@@ -66,5 +77,17 @@ public class UserControllerIntegrationTest {
         mockMvc.perform(put("/users/1/unfollow/2")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testUnfollowUser_InvalidUserId_ThrowsException() throws Exception {
+        User user1 = new User();
+        user1.setUserId(1L);
+
+        userRepository.add(user1);
+
+        mockMvc.perform(put("/users/1/unfollow/99")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }
