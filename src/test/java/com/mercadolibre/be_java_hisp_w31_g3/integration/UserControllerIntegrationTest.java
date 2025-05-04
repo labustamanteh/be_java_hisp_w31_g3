@@ -2,7 +2,6 @@ package com.mercadolibre.be_java_hisp_w31_g3.integration;
 
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.UserRepository;
-import com.mercadolibre.be_java_hisp_w31_g3.service.PostService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,10 +11,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,6 +32,7 @@ public class UserControllerIntegrationTest {
     void SetUp () {
         userRepository.getAll().clear();
     }
+
     @Test
     public void testAddFollower_Success() throws Exception {
         User user1 = new User();
@@ -44,8 +45,10 @@ public class UserControllerIntegrationTest {
         userRepository.add(user2);
 
         mockMvc.perform(post("/users/1/follow/2")
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
+                //.andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -57,7 +60,9 @@ public class UserControllerIntegrationTest {
 
         mockMvc.perform(post("/users/1/follow/99")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -76,7 +81,9 @@ public class UserControllerIntegrationTest {
 
         mockMvc.perform(put("/users/1/unfollow/2")
                         .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
+                //.andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -88,6 +95,8 @@ public class UserControllerIntegrationTest {
 
         mockMvc.perform(put("/users/1/unfollow/99")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 }
