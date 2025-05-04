@@ -37,7 +37,6 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Usamos la CustomFactory para simplificar la creación de usuarios
         user1 = CustomFactory.getUserWithIdAndName(userId1, "User1");
         user2 = CustomFactory.getUserWithIdAndName(userId2, "User2");
     }
@@ -57,68 +56,92 @@ public class UserServiceTest {
 
     @Test
     void addFollower_NullUserId_ThrowsBadRequestException() {
+        // Arrange
+
+        // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(null, userId2));
     }
 
     @Test
     void addFollower_NullUserToFollow_ThrowsBadRequestException() {
+        // Arrange
+
+        // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, null));
     }
 
     @Test
     void addFollower_UserFollowItself_ThrowsBadRequestException() {
+        // Arrange
+
+        // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId1));
     }
 
     @Test
     void addFollower_UserNotFound_ThrowsNotFoundException() {
+        // Arrange
         when(userRepository.getById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
         assertThrows(NotFoundException.class, () -> userService.addFollower(userId1, userId2));
     }
 
     @Test
     void addFollower_UserAlreadyFollowed_ThrowsBadRequestException() {
+        // Arrange
         user1.getFollowed().add(user2);
         when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
         when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
 
+        // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId2));
     }
 
     @Test
     void unfollowUser_ValidUsers_FollowerRemoved() {
+        // Arrange
         when(userRepository.isAnyMatch(any())).thenReturn(true);
 
+        // Act
         userService.unfollowUser(userId1, userId2);
 
+        // Assert
         verify(userRepository).unfollowUser(userId1, userId2);
     }
 
     @Test
     void unfollowUser_UserNotFound_ThrowsNotFoundException() {
+        // Arrange
         when(userRepository.isAnyMatch(any())).thenReturn(false);
 
+        // Act & Assert
         assertThrows(NotFoundException.class, () -> userService.unfollowUser(userId1, userId2));
     }
 
     @Test
     void unfollowUser_UserNotInFollowersList_NoActionNeeded() {
+        // Arrange
         when(userRepository.isAnyMatch(any())).thenReturn(true);
 
+        // Act
         userService.unfollowUser(userId1, userId2);
 
+        // Assert
         assertFalse(user1.getFollowed().contains(user2));
         assertFalse(user2.getFollowers().contains(user1));
     }
 
     @Test
     void unfollowUser_UserUnfollowItself_NoOperation() {
+        // Arrange
         when(userRepository.isAnyMatch(any())).thenReturn(true);
 
+        // Act
         userService.unfollowUser(userId1, userId1);
 
+        // Assert
         verify(userRepository).unfollowUser(userId1, userId1);
-
         assertTrue(user1.getFollowed().isEmpty());
         assertTrue(user1.getFollowers().isEmpty());
     }
