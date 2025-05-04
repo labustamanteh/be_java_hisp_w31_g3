@@ -5,8 +5,6 @@ import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.UserRepository;
-import com.mercadolibre.be_java_hisp_w31_g3.util.CustomFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,22 +28,20 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    private User user1;
-    private User user2;
-    private final long userId1 = 1L;
-    private final long userId2 = 2L;
+    private final User user1 = new User();
+    private final User user2 = new User();
+    private final long userId1 = user1.getUserId();
+    private final long userId2 = user2.getUserId();
 
-    @BeforeEach
-    void setUp() {
-        user1 = CustomFactory.getUserWithIdAndName(userId1, "User1");
-        user2 = CustomFactory.getUserWithIdAndName(userId2, "User2");
+    private void mockUsersExistInRepo() {
+        when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
+        when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
     }
 
     @Test
     void addFollower_ValidUsers_FollowersListUpdated() {
         // Arrange
-        when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
-        when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
+        mockUsersExistInRepo();
 
         // Act
         userService.addFollower(userId1, userId2);
@@ -91,8 +87,7 @@ public class UserServiceTest {
     void addFollower_UserAlreadyFollowed_ThrowsBadRequestException() {
         // Arrange
         user1.getFollowed().add(user2);
-        when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
-        when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
+        mockUsersExistInRepo();
 
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId2));
