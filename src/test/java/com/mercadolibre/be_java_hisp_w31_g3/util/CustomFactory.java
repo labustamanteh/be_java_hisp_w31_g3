@@ -43,4 +43,10 @@ public class CustomFactory {
         return user;
     }
 
+    public static User getUserWithIdAndName(Long userId, String userName) {
+        User user = new User();
+        user.setUserId(userId);
+        user.setUserName(userName);
+        return user;
+    }
 }
