@@ -2,6 +2,7 @@ package com.mercadolibre.be_java_hisp_w31_g3.integration;
 
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.UserRepository;
+import com.mercadolibre.be_java_hisp_w31_g3.util.CustomFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,15 +29,15 @@ public class UserControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    private User user1;
+    private User user2;
+
     @BeforeEach
-    void setUp () {
+    void setUp() {
         userRepository.getAll().clear();
 
-        User user1 = new User();
-        user1.setUserId(1L);
-
-        User user2 = new User();
-        user2.setUserId(2L);
+        user1 = CustomFactory.getUserWithIdAndName(1L, "User1");
+        user2 = CustomFactory.getUserWithIdAndName(2L, "User2");
 
         userRepository.add(user1);
         userRepository.add(user2);
@@ -44,7 +45,7 @@ public class UserControllerIntegrationTest {
 
     @Test
     public void testAddFollower_Success() throws Exception {
-        mockMvc.perform(post("/users/1/follow/2")
+        mockMvc.perform(post("/users/" + user2.getUserId() + "/follow/" + user1.getUserId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
@@ -53,7 +54,7 @@ public class UserControllerIntegrationTest {
 
     @Test
     public void testAddFollower_InvalidUserId_ThrowsException() throws Exception {
-        mockMvc.perform(post("/users/1/follow/99")
+        mockMvc.perform(post("/users/" + user2.getUserId() + "/follow/99")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNotFound())
@@ -62,12 +63,11 @@ public class UserControllerIntegrationTest {
 
     @Test
     public void testUnfollowUser_Success() throws Exception {
-        // Primero aseguramos que el usuario1 sigue al usuario2
-        mockMvc.perform(post("/users/1/follow/2")
+        mockMvc.perform(post("/users/" + user2.getUserId() + "/follow/" + user1.getUserId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(put("/users/1/unfollow/2")
+        mockMvc.perform(put("/users/" + user2.getUserId() + "/unfollow/" + user1.getUserId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
@@ -76,7 +76,7 @@ public class UserControllerIntegrationTest {
 
     @Test
     public void testUnfollowUser_InvalidUserId_ThrowsException() throws Exception {
-        mockMvc.perform(put("/users/1/unfollow/99")
+        mockMvc.perform(put("/users/" + user2.getUserId() + "/unfollow/99")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNotFound())
