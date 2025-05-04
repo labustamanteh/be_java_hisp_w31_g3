@@ -4,9 +4,7 @@ import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Product;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 
 public class CustomFactory {
 
@@ -29,7 +27,7 @@ public class CustomFactory {
                 .build();
     }
 
-    public static User getUserWithFollowedWithTwoPosts(LocalDate datePost1, LocalDate datePost2) {
+    public static User getUserWithOneFollowedWithTwoPosts(LocalDate datePost1, LocalDate datePost2) {
         User userInFollowed = new User();
         userInFollowed.setUserName("user1");
         userInFollowed.getPosts().add(getPostWithoutPromo(userInFollowed.getUserId(), datePost1));
@@ -40,6 +38,12 @@ public class CustomFactory {
 
         user.getFollowed().add(userInFollowed);
         userInFollowed.getFollowers().add(user);
+        return user;
+    }
+
+    public static User getUserWithUserName(String userName) {
+        User user = new User();
+        user.setUserName(userName);
         return user;
     }
 
