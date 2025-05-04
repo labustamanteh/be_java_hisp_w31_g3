@@ -1,24 +1,29 @@
 package com.mercadolibre.be_java_hisp_w31_g3.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.UserRepository;
+import com.mercadolibre.be_java_hisp_w31_g3.util.CustomFactory;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
-
     @Mock
     private UserRepository userRepository;
 
@@ -52,24 +57,18 @@ public class UserServiceTest {
 
     @Test
     void addFollower_NullUserId_ThrowsBadRequestException() {
-        // Arrange
-
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(null, userId2));
     }
 
     @Test
     void addFollower_NullUserToFollow_ThrowsBadRequestException() {
-        // Arrange
-
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, null));
     }
 
     @Test
     void addFollower_UserFollowItself_ThrowsBadRequestException() {
-        // Arrange
-
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId1));
     }
@@ -139,5 +138,31 @@ public class UserServiceTest {
         verify(userRepository).unfollowUser(userId1, userId1);
         assertTrue(user1.getFollowed().isEmpty());
         assertTrue(user1.getFollowers().isEmpty());
+    }
+
+    @Test
+    void getFollowersCountTest_validId_returnUserDto() {
+        // arrange
+        Long userId = 2L;
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+        User user = CustomFactory.getFollowersCount(userId);
+        Optional<User> optionalUser = Optional.of(user);
+        when(userRepository.getById(Mockito.anyLong())).thenReturn(optionalUser);
+
+        // act
+        UserDto userDto = userService.getFollowersCount(userId);
+        // assert
+        assertEquals(user.getUserName(), userDto.getUserName());
+        assertEquals(user.getFollowers().size(), userDto.getFollowersCount());
+    }
+
+    @Test
+    public void getFollowersCountTest_invalid_throwsNotFoundException() {
+        // arrange
+        Long userId = 2000L;
+        when(userRepository.isAnyMatch(any())).thenReturn(false);
+
+        // act &assert
+        assertThrows(NotFoundException.class, () -> userService.getFollowersCount(userId));
     }
 }
