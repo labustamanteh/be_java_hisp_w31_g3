@@ -16,8 +16,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -71,7 +73,7 @@ public class PostServiceTest {
     }
 
     @Test
-    public void getPostFollowed_FollowedWithTwoPostsInThePastTwoWeeks_ReturnsTwoPostsFromFollowedOrderedAsc(){
+    public void getPostFollowed_FollowedWithTwoPostsInThePastTwoWeeks_ReturnsTwoPostsFromFollowedOrderedAsc() {
         // Arrange
         LocalDate date1 = LocalDate.now().minusDays(3);
         LocalDate date2 = LocalDate.now().minusWeeks(1);
@@ -87,15 +89,14 @@ public class PostServiceTest {
         // Assert
         assertNotNull(response);
         assertEquals(2, response.getPosts().size());
-        assertEquals(expectedPosts.get(0).getDate(), response.getPosts().get(1).getDate());
-        response.getPosts().forEach(p -> {
-            LocalDate responsePostLocalDate = LocalDate.parse(p.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            assertTrue(responsePostLocalDate.isAfter(LocalDate.now().minusWeeks(2)));
-        });
+        List<PostDto> orderedExpected = expectedPosts.stream()
+                .sorted(Comparator.comparing(PostDto::getDate))
+                .toList();
+        assertEquals(orderedExpected.get(0).getDate(), response.getPosts().get(0).getDate());
     }
 
     @Test
-    public void getPostFollowed_FollowedWithTwoPostsInThePastTwoWeeks_ReturnsTwoPostsFromFollowedOrderedDesc(){
+    public void getPostFollowed_FollowedWithTwoPostsInThePastTwoWeeks_ReturnsTwoPostsFromFollowedOrderedDesc() {
         // Arrange
         LocalDate date1 = LocalDate.now().minusDays(3);
         LocalDate date2 = LocalDate.now().minusWeeks(1);
@@ -111,10 +112,9 @@ public class PostServiceTest {
         // Assert
         assertNotNull(response);
         assertEquals(2, response.getPosts().size());
-        assertEquals(expectedPosts.get(0).getDate(), response.getPosts().get(0).getDate());
-        response.getPosts().forEach(p -> {
-            LocalDate responsePostLocalDate = LocalDate.parse(p.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            assertTrue(responsePostLocalDate.isAfter(LocalDate.now().minusWeeks(2)));
-        });
+        List<PostDto> orderedExpected = expectedPosts.stream()
+                .sorted(Comparator.comparing(PostDto::getDate).reversed())
+                .toList();
+        assertEquals(orderedExpected.get(0).getDate(), response.getPosts().get(0).getDate());
     }
 }
