@@ -49,5 +49,4 @@ public class CustomFactory {
         user.setUserName(userName);
         return user;
     }
-
 }
