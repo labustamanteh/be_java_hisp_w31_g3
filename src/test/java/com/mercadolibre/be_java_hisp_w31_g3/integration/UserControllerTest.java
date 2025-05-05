@@ -106,16 +106,17 @@ public class UserControllerTest {
         followUser(user1, user2);
 
         // Act
-        MvcResult result = this.mockMvc.perform(get("/users/{userId}/followers/list", user2.getUserId()))
-                .andDo(print()).andExpect(status().isOk())
+        MvcResult result = this.mockMvc.perform(get("/users/{userId}/followers/list", user2.getUserId())
+                        .param("order", "name_asc"))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.user_id").value(user2.getUserId()))
                 .andExpect(jsonPath("$.user_name").value(user2.getUserName()))
-                .andExpect(jsonPath("$.followers[0].user_id").value(user2.getFollowers().get(0).getUserId()))
-                .andExpect(jsonPath("$.followers[0].user_name").value(user2.getFollowers().get(0).getUserName()))
+                .andExpect(jsonPath("$.followers[0].user_id").value(user1.getUserId()))
+                .andExpect(jsonPath("$.followers[0].user_name").value(user1.getUserName()))
                 .andReturn();
 
-        // Assert
         UserDto resultingUserDto = objectMapper.readValue(result.getResponse().getContentAsString(), UserDto.class);
         UserDto expectedUserDto = UserMapper.getUserDto(user2);
 
@@ -186,12 +187,15 @@ public class UserControllerTest {
         followUser(user1, user2);
 
         // Act
-        MvcResult result = this.mockMvc.perform(get("/users/{userId}/followed/list", user1.getUserId()))
-                .andDo(print()).andExpect(status().isOk())
+        MvcResult result = this.mockMvc.perform(get("/users/{userId}/followed/list", user1.getUserId())
+                        .param("order", "name_asc"))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.user_id").value(user1.getUserId()))
                 .andExpect(jsonPath("$.user_name").value(user1.getUserName()))
                 .andReturn();
+
         // Assert
         UserDto resultingUserDto = objectMapper.readValue(result.getResponse().getContentAsString(), UserDto.class);
         UserDto expectedUserDto = UserMapper.getUserDto(user1);
