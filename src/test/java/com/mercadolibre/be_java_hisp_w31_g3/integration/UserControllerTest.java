@@ -169,7 +169,7 @@ public class UserControllerTest {
         // Act & Assert
         this.mockMvc.perform(get("/users/{userId}/followers/list", id))
                 .andDo(print()).andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(expectedMessage))
+                .andExpect(jsonPath("$.message").value(expectedMessage));
     }
 
     @Test
@@ -251,7 +251,7 @@ public class UserControllerTest {
         this.mockMvc.perform(get("/users/{userId}/followed/list", id))
                 .andDo(print()).andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value(expectedMessage))
+                .andExpect(jsonPath("$.message").value(expectedMessage));
     }
 
     private void followUser(User user1, User user2) throws Exception {
