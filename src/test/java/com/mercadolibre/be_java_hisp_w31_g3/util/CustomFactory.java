@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Product;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
@@ -50,7 +53,47 @@ public final class CustomFactory {
         return user;
     }
 
-    public static User  getFollowersCount(Long userId){
+
+    public static String createPromoPost() throws JsonProcessingException {
+
+        return generateFromDto(PostDto.builder().userId(2L)
+                .date("01-04-2025")
+                .product(new ProductDto(5L, "Silla", "Household",
+                        "Racer", "Black", "Special Edition"))
+                .categoryId(100L)
+                .price(700.00)
+                .hasPromo(true)
+                .discount(0.15).build());
+    }
+
+    public static String promoListResponse() throws JsonProcessingException {
+        return generateFromDto(UserDto.builder().userId(2L).userName("Jane Smith")
+                .posts(List.of(PostDto.builder().userId(2L)
+                        .date("01-04-2025")
+                        .postId(1L)
+                        .product(new ProductDto(5L, "Silla", "Household",
+                                "Racer", "Black", "Special Edition"))
+                        .categoryId(100L)
+                        .price(700.00)
+                        .hasPromo(true)
+                        .discount(0.15).build()))
+                .build());
+    }
+
+    public static String promoListWithFiltersResponse() throws JsonProcessingException {
+        return generateFromDto(
+                List.of(PostDto.builder().userId(2L)
+                        .date("01-04-2025")
+                        .postId(1L)
+                        .product(new ProductDto(5L, "Silla", "Household",
+                                "Racer", "Black", "Special Edition"))
+                        .categoryId(100L)
+                        .price(700.00)
+                        .hasPromo(true)
+                        .discount(0.15).build()));
+    }
+
+    public static User  getUserWithFollowers(Long userId){
          User user = new User(userId, "Lady", List.of(new User(), new User()), new ArrayList<User>(),
                 new ArrayList<Post>());
 

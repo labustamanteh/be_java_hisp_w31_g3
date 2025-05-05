@@ -145,7 +145,7 @@ public class UserServiceTest {
         // arrange
         Long userId = 2L;
         when(userRepository.isAnyMatch(any())).thenReturn(true);
-        User user = CustomFactory.getFollowersCount(userId);
+        User user = CustomFactory.getUserWithFollowers(userId);
         Optional<User> optionalUser = Optional.of(user);
         when(userRepository.getById(Mockito.anyLong())).thenReturn(optionalUser);
 
