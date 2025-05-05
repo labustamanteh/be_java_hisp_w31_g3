@@ -1,12 +1,22 @@
 package com.mercadolibre.be_java_hisp_w31_g3.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Product;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-public class CustomFactory {
+public final class CustomFactory {
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    private static final ObjectWriter writer = mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false).writer();
 
     public static Post getPostWithoutPromo(long userId, LocalDate promoDate) {
         Product product = Product.builder()
@@ -45,6 +55,21 @@ public class CustomFactory {
         User user = new User();
         user.setUserName(userName);
         return user;
+    }
+
+    public static User  getFollowersCount(Long userId){
+         User user = new User(userId, "Lady", List.of(new User(), new User()), new ArrayList<User>(),
+                new ArrayList<Post>());
+
+        return user;
+    }
+
+    public static <T> T generateFromJson(String data, Class<T> classType) throws JsonProcessingException {
+        return mapper.readValue(data, classType);
+    }
+
+    public static String generateFromDto(Object dto) throws JsonProcessingException {
+        return writer.writeValueAsString(dto);
     }
 
 }

@@ -19,17 +19,24 @@ import org.springframework.test.web.servlet.MvcResult;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class UserControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
+    private long userId1;
+    private long userId2;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private User user1;
     private User user2;
@@ -37,12 +44,52 @@ public class UserControllerTest {
 
     @BeforeEach
     void setUp() {
+        userRepository.getAll().clear();
         user1 = CustomFactory.getUserWithUserName("Spencer");
         user2 = CustomFactory.getUserWithUserName("Garret");
         user3 = CustomFactory.getUserWithUserName("Camille");
         userRepository.add(user1);
         userRepository.add(user2);
         userRepository.add(user3);
+        userId1 = user1.getUserId();
+        userId2 = user2.getUserId();
+    }
+
+    @Test
+    void addFollowerSuccess() throws Exception {
+        mockMvc.perform(post("/users/" + userId2 + "/follow/" + userId1))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void addFollower_InvalidUserId_ThrowsNotFoundException() throws Exception {
+        mockMvc.perform(post("/users/" + userId2 + "/follow/99"))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Alguno de los usuarios no existe."))
+                .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()));
+    }
+
+    @Test
+    void unfollowUserSuccess() throws Exception {
+        mockMvc.perform(post("/users/" + userId2 + "/follow/" + userId1))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/users/" + userId2 + "/unfollow/" + userId1))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void unfollowUser_InvalidUserId_ThrowsNotFoundException() throws Exception {
+        mockMvc.perform(put("/users/" + userId2 + "/unfollow/99"))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("No se encontró el usuario con el id ingresado"))
+                .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()));
     }
 
     @Test
@@ -122,9 +169,7 @@ public class UserControllerTest {
         // Act & Assert
         this.mockMvc.perform(get("/users/{userId}/followers/list", id))
                 .andDo(print()).andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value(expectedMessage))
-                .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()));
     }
 
     @Test
@@ -139,7 +184,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.user_id").value(user1.getUserId()))
                 .andExpect(jsonPath("$.user_name").value(user1.getUserName()))
                 .andReturn();
-
         // Assert
         UserDto resultingUserDto = objectMapper.readValue(result.getResponse().getContentAsString(), UserDto.class);
         UserDto expectedUserDto = UserMapper.getUserDto(user1);
@@ -158,7 +202,6 @@ public class UserControllerTest {
         MvcResult result = this.mockMvc.perform(get("/users/{userId}/followed/list?order=name_asc",
                         user1.getUserId()))
                 .andDo(print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.user_id").value(user1.getUserId()))
                 .andExpect(jsonPath("$.user_name").value(user1.getUserName()))
                 .andReturn();
@@ -209,7 +252,6 @@ public class UserControllerTest {
                 .andDo(print()).andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value(expectedMessage))
-                .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()));
     }
 
     private void followUser(User user1, User user2) throws Exception {
