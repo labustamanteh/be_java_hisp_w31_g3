@@ -257,13 +257,15 @@ public class ProductControllerTest {
     @Test
         public void getPromoPosts_validId_returnPromoList() throws Exception {
                 // arrange
-                String payLoadJson = CustomFactory.createPromoPost();
+                userRepository.getAll().clear();
+                Post payLoadJson = CustomFactory.createPromoPost();
                 String expectedResponse = CustomFactory.promoListResponse();
+                user.setUserId(2L);
+                user.setUserName("Jane Smith");
+                user.setPosts(List.of(payLoadJson));
+                userRepository.add(user);
 
                 // act & assert
-                 this.mockMvc.perform(post("/products/promo-post").contentType(MediaType.APPLICATION_JSON)
-                                 .content(payLoadJson))
-                                .andDo(print()).andExpect(status().isCreated());
                 MvcResult response = this.mockMvc.perform(get("/products/promo-post/list").param("user_id", "2"))
                                 .andDo(print()).andExpect(status().isOk())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
@@ -288,9 +290,9 @@ public class ProductControllerTest {
         @Test
         public void getPromoTest_isEmptyPromo_throwsNotFound() throws Exception {
                 // arrange
-                String userId = "3";
+                String userId = "6";
                 String expectedErrorMessage = "No hay Productos en promoción";
-
+                System.out.print(user);
                 // act & assert
                 this.mockMvc.perform(get("/products/promo-post/list").param("user_id", userId))
                                 .andDo(print()).andExpect(status().isNotFound())
@@ -307,13 +309,12 @@ public class ProductControllerTest {
                 String category = "100";
                 String color = "Black";
                 String has_promo = "true";
-                String payLoad = CustomFactory.createPromoPost();
+                Post payLoad = CustomFactory.createPromoPost();
+                user.setPosts(List.of(payLoad));
                 String expectedResponse = CustomFactory.promoListWithFiltersResponse();
 
                 // act & assert
-                this.mockMvc.perform(
-                                post("/products/promo-post").contentType(MediaType.APPLICATION_JSON).content(payLoad))
-                                .andDo(print()).andExpect(status().isCreated());
+                
 
                 MvcResult result = this.mockMvc.perform(get("/products/post/list").param("discount", discount)
                                 .param("category", category).param("color", color).param("hasPromo", has_promo))
@@ -411,4 +412,5 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.user_id").value(user1.getUserId()))
                 .andExpect(jsonPath("$.posts").isEmpty());
 
+        }
 }

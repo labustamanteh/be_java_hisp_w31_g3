@@ -5,6 +5,7 @@ import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.IUserRepository;
+import com.mercadolibre.be_java_hisp_w31_g3.util.CustomFactory;
 import com.mercadolibre.be_java_hisp_w31_g3.util.PostMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
