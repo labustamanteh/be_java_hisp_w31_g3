@@ -143,4 +143,5 @@ public final class CustomFactory {
         principalUser.setFollowed(List.of(followedUser));
         return principalUser;
     }
+
 }
