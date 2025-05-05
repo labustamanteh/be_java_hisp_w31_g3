@@ -18,19 +18,40 @@ public final class CustomFactory {
 
     private static final ObjectWriter writer = mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false).writer();
 
-    public static Post getPostWithoutPromo(long userId, LocalDate promoDate) {
+    public static Post getPostWithoutPromo(long userId, LocalDate postDate) {
         Product product = Product.builder()
                 .productId(1L)
                 .productName("product1")
                 .brand("brand1")
                 .color("red")
                 .type("type1")
+                .notes("notes")
                 .build();
 
         return Post.builder()
                 .postId(Post.getGeneratedId())
                 .userId(userId)
-                .date(promoDate)
+                .date(postDate)
+                .product(product)
+                .categoryId(1L)
+                .price(200.0)
+                .build();
+    }
+
+    public static Post getPostWithProductWithDifferentCharacteristics(long userId, long productId, LocalDate postDate) {
+        Product product = Product.builder()
+                .productId(productId)
+                .productName("product2")
+                .brand("brand2")
+                .color("black")
+                .type("type2")
+                .notes("notes2")
+                .build();
+
+        return Post.builder()
+                .postId(Post.getGeneratedId())
+                .userId(userId)
+                .date(postDate)
                 .product(product)
                 .categoryId(1L)
                 .price(200.0)

@@ -45,7 +45,6 @@ public class PostService implements IPostService {
 
     @Override
     public void addPost(PostDto postDto) {
-        validatePostDate(postDto.getDate());
         checkUserExists(postDto.getUserId());
         checkProductUniqueness(postDto);
 
@@ -125,20 +124,6 @@ public class PostService implements IPostService {
                 break;
         }
         return postList;
-    }
-
-    private void validatePostDate(String date) {
-        if (date.trim().isEmpty()) {
-            throw new BadRequestException("La fecha no puede estar vacía");
-        }
-
-        try {
-            LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        } catch (DateTimeException e) {
-            throw new BadRequestException("La fecha no está en el formato adecuado dd-MM-yyyy");
-        } catch (Exception e) {
-            throw new BadRequestException("Error: " + e.getMessage());
-        }
     }
 
     private void checkUserExists(Long userId) {
