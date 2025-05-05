@@ -20,8 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -56,7 +55,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void addFollowerSuccess() throws Exception {
+    void addFollower_ValidUsers_FollowerAdded() throws Exception {
         mockMvc.perform(post("/users/" + userId2 + "/follow/" + userId1))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -73,7 +72,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void unfollowUserSuccess() throws Exception {
+    void unfollowUser_ValidUsers_UnfollowedSuccessfully() throws Exception {
         mockMvc.perform(post("/users/" + userId2 + "/follow/" + userId1))
                 .andExpect(status().isOk());
 
@@ -90,6 +89,17 @@ public class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("No se encontró el usuario con el id ingresado"))
                 .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()));
+    }
+
+    @Test
+    void followersCount_ValidUser_ReturnsCorrectCount() throws Exception {
+        mockMvc.perform(post("/users/" + userId2 + "/follow/" + userId1))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/users/" + userId1 + "/followers/count"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.followers_count").value(1));
     }
 
     @Test

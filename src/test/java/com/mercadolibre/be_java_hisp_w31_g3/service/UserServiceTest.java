@@ -56,6 +56,23 @@ public class UserServiceTest {
     }
 
     @Test
+    void addFollower_UserAlreadyInFollowersList_ThrowsBadRequestException() {
+        // Arrange
+        User follower = new User();
+        follower.setUserId(userId1);
+        User followed = new User();
+        followed.setUserId(userId2);
+
+        followed.getFollowers().add(follower);
+
+        when(userRepository.getById(userId1)).thenReturn(Optional.of(follower));
+        when(userRepository.getById(userId2)).thenReturn(Optional.of(followed));
+
+        // Act & Assert
+        assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId2));
+    }
+
+    @Test
     void addFollower_NullUserId_ThrowsBadRequestException() {
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(null, userId2));
