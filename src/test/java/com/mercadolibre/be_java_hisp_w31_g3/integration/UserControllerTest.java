@@ -44,7 +44,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void addFollowerSuccess() throws Exception {
+    void addFollower_ValidUsers_FollowerAdded() throws Exception {
         mockMvc.perform(post("/users/" + userId2 + "/follow/" + userId1))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -61,7 +61,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void unfollowUserSuccess() throws Exception {
+    void unfollowUser_ValidUsers_UnfollowedSuccessfully() throws Exception {
         mockMvc.perform(post("/users/" + userId2 + "/follow/" + userId1))
                 .andExpect(status().isOk());
 
@@ -81,7 +81,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void followersCountSuccess() throws Exception {
+    void followersCount_ValidUser_ReturnsCorrectCount() throws Exception {
         mockMvc.perform(post("/users/" + userId2 + "/follow/" + userId1))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/users/" + userId1 + "/followers/count"))
