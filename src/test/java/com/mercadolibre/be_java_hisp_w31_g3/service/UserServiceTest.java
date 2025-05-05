@@ -135,9 +135,9 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getUserOrderAscTest_valid_returnListOrderName() {
+    public void getFollowedList_ValidOrderAsc_returnListOrderName() {
         // Arrange
-        User user = CustomFactory.getUserOrderAscTest();
+        User user = CustomFactory.getUserFollowedListAsc();
         when(userRepository.isAnyMatch(any())).thenReturn(true);
         when(userRepository.getById(4L)).thenReturn(Optional.of(user));
 
@@ -151,9 +151,9 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getUserOrderDescTest_valid_returnListOrderName() {
+    public void getFollowedList_ValidOrderDesc_returnListOrderName() {
         // Arrange
-        User user = CustomFactory.getUserOrderAscTest();
+        User user = CustomFactory.getUserFollowedListDesc();
         when(userRepository.isAnyMatch(any())).thenReturn(true);
         when(userRepository.getById(4L)).thenReturn(Optional.of(user));
 
@@ -167,9 +167,9 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getUserOrderDescTest_invalid_throwsException() {
+    public void getFollowedList_InvalidTypeOrder_throwsException() {
         // Arrange
-        User user = CustomFactory.getUserOrderAscTest();
+        User user = CustomFactory.getUserFollowedListDesc();
         when(userRepository.isAnyMatch(any())).thenReturn(true);
         when(userRepository.getById(4L)).thenReturn(Optional.of(user));
 

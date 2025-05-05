@@ -65,7 +65,7 @@ public final class CustomFactory {
         return writer.writeValueAsString(dto);
     }
 
-    public static User getUserOrderAscTest(){
+    public static User getUserFollowedListAsc(){
         User user1 = new User();
         user1.setUserName("Jane Smith");
 
@@ -81,7 +81,7 @@ public final class CustomFactory {
         return user3;
     }
 
-    public static User getUserOrderDescTest(){
+    public static User getUserFollowedListDesc(){
         User user1 = new User();
         user1.setUserName("Alice Johnson");
 
