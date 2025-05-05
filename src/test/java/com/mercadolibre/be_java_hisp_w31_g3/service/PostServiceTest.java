@@ -124,7 +124,7 @@ public class PostServiceTest {
         });
     }
 
-    @ParameterizedTest(name = "T-0005: Ordenamiento {0} devuelve posts ordenados por fecha")
+    @ParameterizedTest(name = "T-0005 & T-0006: Ordenamiento {0} devuelve posts ordenados por fecha")
     @MethodSource("com.mercadolibre.be_java_hisp_w31_g3.util.TestUtils#getCorrectDateOrders")
     public void getPostFollowed_FollowedPostsOrderByDate_ReturnsCorrectOrder(String order, Comparator<String> expectedComparator) {
         // Arrange
@@ -144,7 +144,7 @@ public class PostServiceTest {
         verify(userRepository).getById(anyLong());
     }
 
-    @ParameterizedTest(name = "T-0005: Ordenamiento {0} devuelve posts ordenados mal")
+    @ParameterizedTest(name = "T-0005 & T-0006: Ordenamiento {0} devuelve posts ordenados mal")
     @MethodSource("com.mercadolibre.be_java_hisp_w31_g3.util.TestUtils#getWrongDateOrders")
     public void getPostFollowed_FollowedPostsOrderByDate_WrongOrder_ReturnsOrder(String order, Comparator<String> wrongComparator) {
         // Arrange
@@ -165,7 +165,7 @@ public class PostServiceTest {
     }
 
     @Test
-    @DisplayName("T-0005: getPostFollowed lanza NotFoundException si el usuario no existe")
+    @DisplayName("T-0005 & T-0006: getPostFollowed lanza NotFoundException si el usuario no existe")
     public void getPostFollowed_FollowedPostsOrderByDate_NotFoundUser_ThrowException(){
         //Arrange
         String orderType = "date_asc";
@@ -177,7 +177,7 @@ public class PostServiceTest {
     }
 
     @Test
-    @DisplayName("T-0005: getPostFollowed lanza NotFoundException si el tipo de orden no es válido")
+    @DisplayName("T-0005 & T-0006: getPostFollowed lanza NotFoundException si el tipo de orden no es válido")
     public void getPostFollowed_FollowedPostsOrderByDate_NotFoundOrderType_ThrowException(){
         //Arrange
         String orderType = "name_asc";
