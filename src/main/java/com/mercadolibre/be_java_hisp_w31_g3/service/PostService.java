@@ -123,6 +123,8 @@ public class PostService implements IPostService {
             case "date_desc":
                 postList = postList.stream().sorted(Comparator.comparing(PostDto::getDate).reversed()).toList();
                 break;
+            default:
+                throw new NotFoundException("No se encontró el tipo de ordenamiento solicitado");
         }
         return postList;
     }
