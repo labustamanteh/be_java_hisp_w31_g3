@@ -40,7 +40,7 @@ public class PostServiceTest {
         // Arrange
         LocalDate date1 = Instant.now().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate date2 = LocalDate.now().minusWeeks(4);
-        User user = CustomFactory.getUserWithFollowedWithTwoPosts(date1, date2);
+        User user = CustomFactory.getUserWithOneFollowedWithTwoPosts(date1, date2);
         long userId = user.getUserId();
         when(userRepository.isAnyMatch(any())).thenReturn(true);
         when(userRepository.getById(userId)).thenReturn(Optional.of(user));
@@ -62,7 +62,7 @@ public class PostServiceTest {
         // Arrange
         LocalDate date1 = LocalDate.now().minusWeeks(6);
         LocalDate date2 = LocalDate.now().minusWeeks(4);
-        User user = CustomFactory.getUserWithFollowedWithTwoPosts(date1, date2);
+        User user = CustomFactory.getUserWithOneFollowedWithTwoPosts(date1, date2);
         long userId = user.getUserId();
         when(userRepository.isAnyMatch(any())).thenReturn(true);
         when(userRepository.getById(userId)).thenReturn(Optional.of(user));
@@ -80,7 +80,7 @@ public class PostServiceTest {
         // Arrange
         LocalDate date1 = LocalDate.now().minusDays(3);
         LocalDate date2 = LocalDate.now().minusWeeks(1);
-        User user = CustomFactory.getUserWithFollowedWithTwoPosts(date1, date2);
+        User user = CustomFactory.getUserWithOneFollowedWithTwoPosts(date1, date2);
         long userId = user.getUserId();
         when(userRepository.isAnyMatch(any())).thenReturn(true);
         when(userRepository.getById(userId)).thenReturn(Optional.of(user));
@@ -103,7 +103,7 @@ public class PostServiceTest {
         // Arrange
         LocalDate date1 = LocalDate.now().minusDays(3);
         LocalDate date2 = LocalDate.now().minusWeeks(1);
-        User user = CustomFactory.getUserWithFollowedWithTwoPosts(date1, date2);
+        User user = CustomFactory.getUserWithOneFollowedWithTwoPosts(date1, date2);
         long userId = user.getUserId();
         when(userRepository.isAnyMatch(any())).thenReturn(true);
         when(userRepository.getById(userId)).thenReturn(Optional.of(user));

@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,6 +53,23 @@ public class UserServiceTest {
 
         // Assert
         verify(userRepository).addFollower(userId1, userId2);
+    }
+
+    @Test
+    void addFollower_UserAlreadyInFollowersList_ThrowsBadRequestException() {
+        // Arrange
+        User follower = new User();
+        follower.setUserId(userId1);
+        User followed = new User();
+        followed.setUserId(userId2);
+
+        followed.getFollowers().add(follower);
+
+        when(userRepository.getById(userId1)).thenReturn(Optional.of(follower));
+        when(userRepository.getById(userId2)).thenReturn(Optional.of(followed));
+
+        // Act & Assert
+        assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId2));
     }
 
     @Test
@@ -144,7 +162,7 @@ public class UserServiceTest {
         // arrange
         Long userId = 2L;
         when(userRepository.isAnyMatch(any())).thenReturn(true);
-        User user = CustomFactory.getFollowersCount(userId);
+        User user = CustomFactory.getUserWithFollowers(userId);
         Optional<User> optionalUser = Optional.of(user);
         when(userRepository.getById(Mockito.anyLong())).thenReturn(optionalUser);
 
@@ -164,4 +182,48 @@ public class UserServiceTest {
         // act &assert
         assertThrows(NotFoundException.class, () -> userService.getFollowersCount(userId));
     }
+
+    @Test
+    public void getFollowedList_ValidOrderAsc_returnListOrderName() {
+        // Arrange
+        User user = CustomFactory.getUserFollowedListAsc();
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+        when(userRepository.getById(4L)).thenReturn(Optional.of(user));
+
+        // Act
+        UserDto result = userService.getFollowedList(4L, "name_asc");
+        List<UserDto> followedList = result.getFollowed();
+
+        // Assert
+        assertEquals("Alice Johnson", followedList.get(0).getUserName());
+        assertEquals("Jane Smith", followedList.get(1).getUserName());
+    }
+
+    @Test
+    public void getFollowedList_ValidOrderDesc_returnListOrderName() {
+        // Arrange
+        User user = CustomFactory.getUserFollowedListDesc();
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+        when(userRepository.getById(4L)).thenReturn(Optional.of(user));
+
+        // Act
+        UserDto result = userService.getFollowedList(4L, "name_desc");
+        List<UserDto> followedList = result.getFollowed();
+
+        // Assert
+        assertEquals("Jane Smith", followedList.get(0).getUserName());
+        assertEquals("Alice Johnson", followedList.get(1).getUserName());
+    }
+
+    @Test
+    public void getFollowedList_InvalidTypeOrder_throwsException() {
+        // Arrange
+        User user = CustomFactory.getUserFollowedListDesc();
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+        when(userRepository.getById(4L)).thenReturn(Optional.of(user));
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> userService.getFollowedList(4L, "name_ascs"));
+    }
+
 }
