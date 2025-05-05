@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Product;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,26 +20,47 @@ public final class CustomFactory {
 
     private static final ObjectWriter writer = mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false).writer();
 
-    public static Post getPostWithoutPromo(long userId, LocalDate promoDate) {
+    public static Post getPostWithoutPromo(long userId, LocalDate postDate) {
         Product product = Product.builder()
                 .productId(1L)
                 .productName("product1")
                 .brand("brand1")
                 .color("red")
                 .type("type1")
+                .notes("notes")
                 .build();
 
         return Post.builder()
                 .postId(Post.getGeneratedId())
                 .userId(userId)
-                .date(promoDate)
+                .date(postDate)
                 .product(product)
                 .categoryId(1L)
                 .price(200.0)
                 .build();
     }
 
-    public static User getUserWithFollowedWithTwoPosts(LocalDate datePost1, LocalDate datePost2) {
+    public static Post getPostWithProductWithDifferentCharacteristics(long userId, long productId, LocalDate postDate) {
+        Product product = Product.builder()
+                .productId(productId)
+                .productName("product2")
+                .brand("brand2")
+                .color("black")
+                .type("type2")
+                .notes("notes2")
+                .build();
+
+        return Post.builder()
+                .postId(Post.getGeneratedId())
+                .userId(userId)
+                .date(postDate)
+                .product(product)
+                .categoryId(1L)
+                .price(200.0)
+                .build();
+    }
+
+    public static User getUserWithOneFollowedWithTwoPosts(LocalDate datePost1, LocalDate datePost2) {
         User userInFollowed = new User();
         userInFollowed.setUserName("user1");
         userInFollowed.getPosts().add(getPostWithoutPromo(userInFollowed.getUserId(), datePost1));
@@ -49,6 +71,12 @@ public final class CustomFactory {
 
         user.getFollowed().add(userInFollowed);
         userInFollowed.getFollowers().add(user);
+        return user;
+    }
+
+    public static User getUserWithUserName(String userName) {
+        User user = new User();
+        user.setUserName(userName);
         return user;
     }
 
@@ -143,5 +171,4 @@ public final class CustomFactory {
         principalUser.setFollowed(List.of(followedUser));
         return principalUser;
     }
-
 }

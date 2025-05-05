@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadolibre.be_java_hisp_w31_g3.dto.UserDto;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.BadRequestException;
 import com.mercadolibre.be_java_hisp_w31_g3.exception.NotFoundException;
-import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
 import com.mercadolibre.be_java_hisp_w31_g3.repository.UserRepository;
 import com.mercadolibre.be_java_hisp_w31_g3.util.CustomFactory;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,21 +33,20 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    @BeforeEach
-    void setUp() {
+    private final User user1 = new User();
+    private final User user2 = new User();
+    private final long userId1 = user1.getUserId();
+    private final long userId2 = user2.getUserId();
+
+    private void mockUsersExistInRepo() {
+        when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
+        when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
     }
 
     @Test
     void addFollower_ValidUsers_FollowersListUpdated() {
         // Arrange
-        User user1 = new User();
-        User user2 = new User();
-
-        long userId1 = user1.getUserId();
-        long userId2 = user2.getUserId();
-
-        when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
-        when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
+        mockUsersExistInRepo();
 
         // Act
         userService.addFollower(userId1, userId2);
@@ -63,22 +58,19 @@ public class UserServiceTest {
     @Test
     void addFollower_NullUserId_ThrowsBadRequestException() {
         // Act & Assert
-        assertThrows(BadRequestException.class, () -> userService.addFollower(null, 2L));
+        assertThrows(BadRequestException.class, () -> userService.addFollower(null, userId2));
     }
 
     @Test
     void addFollower_NullUserToFollow_ThrowsBadRequestException() {
         // Act & Assert
-        assertThrows(BadRequestException.class, () -> userService.addFollower(1L, null));
+        assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, null));
     }
 
     @Test
     void addFollower_UserFollowItself_ThrowsBadRequestException() {
-        // Arrange
-        Long userId = 1L;
-
         // Act & Assert
-        assertThrows(BadRequestException.class, () -> userService.addFollower(userId, userId));
+        assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId1));
     }
 
     @Test
@@ -87,25 +79,65 @@ public class UserServiceTest {
         when(userRepository.getById(anyLong())).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(NotFoundException.class, () -> userService.addFollower(1L, 2L));
+        assertThrows(NotFoundException.class, () -> userService.addFollower(userId1, userId2));
     }
 
     @Test
     void addFollower_UserAlreadyFollowed_ThrowsBadRequestException() {
         // Arrange
-        User user1 = new User();
-        User user2 = new User();
-
-        long userId1 = user1.getUserId();
-        long userId2 = user2.getUserId();
-
         user1.getFollowed().add(user2);
-
-        when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
-        when(userRepository.getById(userId2)).thenReturn(Optional.of(user2));
+        mockUsersExistInRepo();
 
         // Act & Assert
         assertThrows(BadRequestException.class, () -> userService.addFollower(userId1, userId2));
+    }
+
+    @Test
+    void unfollowUser_ValidUsers_FollowerRemoved() {
+        // Arrange
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+
+        // Act
+        userService.unfollowUser(userId1, userId2);
+
+        // Assert
+        verify(userRepository).unfollowUser(userId1, userId2);
+    }
+
+    @Test
+    void unfollowUser_UserNotFound_ThrowsNotFoundException() {
+        // Arrange
+        when(userRepository.isAnyMatch(any())).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> userService.unfollowUser(userId1, userId2));
+    }
+
+    @Test
+    void unfollowUser_UserNotInFollowersList_NoActionNeeded() {
+        // Arrange
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+
+        // Act
+        userService.unfollowUser(userId1, userId2);
+
+        // Assert
+        assertFalse(user1.getFollowed().contains(user2));
+        assertFalse(user2.getFollowers().contains(user1));
+    }
+
+    @Test
+    void unfollowUser_UserUnfollowItself_NoOperation() {
+        // Arrange
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+
+        // Act
+        userService.unfollowUser(userId1, userId1);
+
+        // Assert
+        verify(userRepository).unfollowUser(userId1, userId1);
+        assertTrue(user1.getFollowed().isEmpty());
+        assertTrue(user1.getFollowers().isEmpty());
     }
 
     @Test
