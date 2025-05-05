@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.PostDto;
+import com.mercadolibre.be_java_hisp_w31_g3.dto.ProductDto;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Post;
 import com.mercadolibre.be_java_hisp_w31_g3.model.Product;
 import com.mercadolibre.be_java_hisp_w31_g3.model.User;
@@ -93,6 +95,79 @@ public final class CustomFactory {
 
     public static String generateFromDto(Object dto) throws JsonProcessingException {
         return writer.writeValueAsString(dto);
+    }
+
+    public static User getUserFollowedListAsc(){
+        User user1 = new User();
+        user1.setUserName("Jane Smith");
+
+        User user2 = new User();
+        user2.setUserName("Alice Johnson");
+
+        User user3 = new User();
+        user3.setUserName("Bob Brown");
+
+        user3.getFollowed().add(user1);
+        user3.getFollowed().add(user2);
+
+        return user3;
+    }
+
+    public static User getUserFollowedListDesc(){
+        User user1 = new User();
+        user1.setUserName("Alice Johnson");
+
+        User user2 = new User();
+        user2.setUserName("Jane Smith");
+
+        User user3 = new User();
+        user3.setUserName("Bob Brown");
+
+        user3.getFollowed().add(user1);
+        user3.getFollowed().add(user2);
+
+        return user3;
+    }
+
+    public static Post getPostWithPromo(long userId, LocalDate promoDate) {
+        Product product = Product.builder()
+                .productId(1L)
+                .productName("product1")
+                .brand("brand1")
+                .color("red")
+                .type("type1")
+                .build();
+
+        return Post.builder()
+                .postId(Post.getGeneratedId())
+                .userId(userId)
+                .date(promoDate)
+                .product(product)
+                .categoryId(1L)
+                .price(200.0)
+                .hasPromo(true)
+                .build();
+    }
+
+    public static PostDto getPost(){
+        ProductDto productDto = ProductDto.builder()
+                .productId(5L)
+                .productName("Silla")
+                .type("Household")
+                .brand("Racer")
+                .color("Black")
+                .notes("Special Edition")
+                .build();
+
+        return PostDto.builder()
+                .userId(2L)
+                .date("01-04-2025")
+                .product(productDto)
+                .categoryId(100L)
+                .price(700.00)
+                .hasPromo(true)
+                .discount(0.15)
+                .build();
     }
 
     public static User getUserWithFollowedListAndPosts() {
