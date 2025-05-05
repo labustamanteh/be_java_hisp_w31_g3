@@ -65,4 +65,35 @@ public final class CustomFactory {
         return writer.writeValueAsString(dto);
     }
 
+    public static User getUserOrderAscTest(){
+        User user1 = new User();
+        user1.setUserName("Jane Smith");
+
+        User user2 = new User();
+        user2.setUserName("Alice Johnson");
+
+        User user3 = new User();
+        user3.setUserName("Bob Brown");
+
+        user3.getFollowed().add(user1);
+        user3.getFollowed().add(user2);
+
+        return user3;
+    }
+
+    public static User getUserOrderDescTest(){
+        User user1 = new User();
+        user1.setUserName("Alice Johnson");
+
+        User user2 = new User();
+        user2.setUserName("Jane Smith");
+
+        User user3 = new User();
+        user3.setUserName("Bob Brown");
+
+        user3.getFollowed().add(user1);
+        user3.getFollowed().add(user2);
+
+        return user3;
+    }
 }

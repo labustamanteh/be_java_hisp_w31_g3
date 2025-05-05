@@ -133,4 +133,48 @@ public class UserServiceTest {
         // act &assert
         assertThrows(NotFoundException.class, () -> userService.getFollowersCount(userId));
     }
+
+    @Test
+    public void getUserOrderAscTest_valid_returnListOrderName() {
+        // Arrange
+        User user = CustomFactory.getUserOrderAscTest();
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+        when(userRepository.getById(4L)).thenReturn(Optional.of(user));
+
+        // Act
+        UserDto result = userService.getFollowedList(4L, "name_asc");
+        List<UserDto> followedList = result.getFollowed();
+
+        // Assert
+        assertEquals("Alice Johnson", followedList.get(0).getUserName());
+        assertEquals("Jane Smith", followedList.get(1).getUserName());
+    }
+
+    @Test
+    public void getUserOrderDescTest_valid_returnListOrderName() {
+        // Arrange
+        User user = CustomFactory.getUserOrderAscTest();
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+        when(userRepository.getById(4L)).thenReturn(Optional.of(user));
+
+        // Act
+        UserDto result = userService.getFollowedList(4L, "name_desc");
+        List<UserDto> followedList = result.getFollowed();
+
+        // Assert
+        assertEquals("Jane Smith", followedList.get(0).getUserName());
+        assertEquals("Alice Johnson", followedList.get(1).getUserName());
+    }
+
+    @Test
+    public void getUserOrderDescTest_invalid_throwsException() {
+        // Arrange
+        User user = CustomFactory.getUserOrderAscTest();
+        when(userRepository.isAnyMatch(any())).thenReturn(true);
+        when(userRepository.getById(4L)).thenReturn(Optional.of(user));
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> userService.getFollowedList(4L, "name_ascs"));
+    }
+
 }

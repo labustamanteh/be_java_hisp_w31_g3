@@ -134,6 +134,8 @@ public class UserService implements IUserService {
             case "name_desc":
                 userList = userList.stream().sorted(Comparator.comparing(User::getUserName).reversed()).toList();
                 break;
+            default:
+                throw new NotFoundException("Debe ingresar un tipo de orden correcto.");
         }
         return userList;
     }
