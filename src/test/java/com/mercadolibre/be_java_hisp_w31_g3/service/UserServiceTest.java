@@ -39,6 +39,7 @@ public class UserServiceTest {
     private final User user2 = new User();
     private final long userId1 = user1.getUserId();
     private final long userId2 = user2.getUserId();
+    private final List<User> userList = List.of(user1, user2);
 
     private void mockUsersExistInRepo() {
         when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));

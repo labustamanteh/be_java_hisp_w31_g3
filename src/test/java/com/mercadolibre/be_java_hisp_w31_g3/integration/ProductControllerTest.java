@@ -184,12 +184,17 @@ public class ProductControllerTest {
     void createPost_ValidPost_ReturnTrue() throws Exception {
         // Arrange
         PostDto postDto = CustomFactory.getPost();
+        postDto.setUserId(user.getUserId());
+
         String postJson = CustomFactory.generateFromDto(postDto);
         // Act & Assert
-        mockMvc.perform(post("/products/promo-post").contentType(MediaType.APPLICATION_JSON).content(postJson)).andExpect(status().isCreated()).andExpect(content().string(""));
+        mockMvc.perform(post("/products/promo-post")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(postJson)).andExpect(status().isCreated())
+                .andExpect(content().string(""));
     }
 
-     @Test
+    @Test
     void createPost_InvalidDateFormat_ReturnBadRequest() throws Exception {
         // Arrange
         PostDto postDto = CustomFactory.getPost();
@@ -207,12 +212,15 @@ public class ProductControllerTest {
         postDto.setUserId(null);
 
         String postJson = CustomFactory.generateFromDto(postDto);
+
         // Act & Assert
         mockMvc.perform(post("/products/promo-post")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(postJson))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.user.getUserId()[0]").value("El id no puede estar vacío"));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.errors.userId[0]").value("El id no puede estar vacío"));
     }
 
     @Test
@@ -220,14 +228,15 @@ public class ProductControllerTest {
         // Arrange
         PostDto postDto = CustomFactory.getPost();
         postDto.setUserId(0L);
-
         String postJson = CustomFactory.generateFromDto(postDto);
+
         // Act & Assert
         mockMvc.perform(post("/products/promo-post")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(postJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.user.getUserId()[0]").value("El id debe ser mayor a cero"));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.errors.userId[0]").value("El id debe ser mayor a cero"));
     }
 
     @Test
@@ -290,16 +299,15 @@ public class ProductControllerTest {
         @Test
         public void getPromoTest_isEmptyPromo_throwsNotFound() throws Exception {
                 // arrange
-                String userId = "6";
-                String expectedErrorMessage = "No hay Productos en promoción";
-                System.out.print(user);
+            User userNoPromo = CustomFactory.getUserWithUserName("NoPromotionUser");
+            userRepository.add(userNoPromo);
                 // act & assert
-                this.mockMvc.perform(get("/products/promo-post/list").param("user_id", userId))
+                mockMvc.perform(get("/products/promo-post/list").param("user_id", String.valueOf(userNoPromo.getUserId())))
                                 .andDo(print()).andExpect(status().isNotFound())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(result -> assertInstanceOf(NotFoundException.class,
                                                 result.getResolvedException()))
-                                .andExpect(jsonPath("$.message").value(expectedErrorMessage));
+                                .andExpect(jsonPath("$.message").value("No hay Productos en promoción"));
         }
 
         @Test
@@ -362,23 +370,20 @@ public class ProductControllerTest {
     @Test
     @DisplayName("T-0012 - US-0006: obtiene los post de los seguidos por el usuario ")
     void getFollowedByUserId_ReturnJsonWithPost() throws Exception {
-        //Arrange
+        // Arrange
         User user1 = CustomFactory.getUserWithFollowedListAndPosts();
         userRepository.add(user1);
-        LocalDate threshold = LocalDate.now().minusWeeks(2);
-        List<Long> expectedIdsLast2Weeks = user1.getFollowed().get(0).getPosts()
-                .stream()
-                .filter(p -> p.getDate().isAfter(threshold))
-                .map(Post::getPostId)
-                .toList();
-        //Act & Assert
+
+        // Act & Assert
         mockMvc.perform(get("/products/followed/{userId}/list", user1.getUserId())
+                        .param("order", "date_asc")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.user_id").value(user1.getUserId()))
-                .andExpect(jsonPath("$.posts.length()").value(expectedIdsLast2Weeks.size()));
+                .andExpect(jsonPath("$.posts.length()").value(
+                        (int) user1.getFollowed().get(0).getPosts().stream().filter(p -> p.getDate().isAfter(LocalDate.now().minusWeeks(2))).count()));
     }
 
     @Test
@@ -399,18 +404,18 @@ public class ProductControllerTest {
     @Test
     @DisplayName("T-0012 - US-0006: devuelve una lista vacia")
     void getFollowedByUserId_ReturnEmptyListUser() throws Exception {
-        //Arrange
-        User user1 = new User();
-        userRepository.add(user1);
-        LocalDate threshold = LocalDate.now().minusWeeks(2);
-        //Act & Assert
-        mockMvc.perform(get("/products/followed/{userId}/list", user1.getUserId())
+        // Arrange
+        User userWithNoPosts = CustomFactory.getUserWithUserName("NoPostsUser");
+        userRepository.add(userWithNoPosts);
+
+        // Act & Assert
+        mockMvc.perform(get("/products/followed/{userId}/list", userWithNoPosts.getUserId())
+                        .param("order", "date_asc")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.user_id").value(user1.getUserId()))
+                .andExpect(jsonPath("$.user_id").value(userWithNoPosts.getUserId()))
                 .andExpect(jsonPath("$.posts").isEmpty());
-
-        }
+    }
 }
