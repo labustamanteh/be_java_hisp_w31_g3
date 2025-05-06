@@ -186,4 +186,19 @@ public class PostServiceTest {
         assertThrows(NotFoundException.class,
                 () -> postService.getPostFollowed(anyLong(), orderType));
     }
+
+    @Test
+    void getPostsByFilter_NoFilters_ReturnsAllPosts() {
+        // Arrange
+        List<User> users = CustomFactory.getUserWithFollowedListAndPosts().getFollowed();
+        List<PostDto> expectedPosts = users.stream().flatMap(user -> user.getPosts().stream())
+                .map(PostMapper::convertToPostDto).toList();
+        when(userRepository.getAll()).thenReturn(users);
+
+        // Act
+        List<PostDto> postDtos = postService.getPostsByFilter(null, null, "", null);
+
+        // Assert
+        assertEquals(expectedPosts.size(), postDtos.size());
+    }
 }

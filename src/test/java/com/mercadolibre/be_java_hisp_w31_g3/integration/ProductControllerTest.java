@@ -264,108 +264,105 @@ public class ProductControllerTest {
     }
 
     @Test
-        public void getPromoPosts_validId_returnPromoList() throws Exception {
-                // arrange
-                userRepository.getAll().clear();
-                Post payLoadJson = CustomFactory.createPromoPost();
-                String expectedResponse = CustomFactory.promoListResponse();
-                user.setUserId(2L);
-                user.setUserName("Jane Smith");
-                user.setPosts(List.of(payLoadJson));
-                userRepository.add(user);
+    public void getPromoPosts_validId_returnPromoList() throws Exception {
+        // arrange
+        userRepository.getAll().clear();
+        Post payLoadJson = CustomFactory.createPromoPost();
+        String expectedResponse = CustomFactory.promoListResponse();
+        user.setUserId(2L);
+        user.setUserName("Jane Smith");
+        user.setPosts(List.of(payLoadJson));
+        userRepository.add(user);
 
-                // act & assert
-                MvcResult response = this.mockMvc.perform(get("/products/promo-post/list").param("user_id", "2"))
-                                .andDo(print()).andExpect(status().isOk())
-                                .andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
-                Assertions.assertEquals(expectedResponse, response.getResponse().getContentAsString());
-        }
+        // act & assert
+        MvcResult response = this.mockMvc.perform(get("/products/promo-post/list").param("user_id", "2"))
+                .andDo(print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
+        assertEquals(expectedResponse, response.getResponse().getContentAsString());
+    }
 
-        @Test
-        public void getPromoPostTest_invalidId_throwsNotFound() throws Exception {
-                // arrange
-                String userId = "220";
-                String expectedErrorMessage = "No se encontró el usuario con el id ingresado";
+    @Test
+    public void getPromoPostTest_invalidId_throwsNotFound() throws Exception {
+        // arrange
+        String userId = "220";
+        String expectedErrorMessage = "No se encontró el usuario con el id ingresado";
 
-                // act & assert
-                this.mockMvc.perform(get("/products/promo-post/list").param("user_id", userId))
-                                .andDo(print()).andExpect(status().isNotFound())
-                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(result -> assertInstanceOf(NotFoundException.class,
-                                                result.getResolvedException()))
-                                .andExpect(jsonPath("$.message").value(expectedErrorMessage));
-        }
+        // act & assert
+        this.mockMvc.perform(get("/products/promo-post/list").param("user_id", userId))
+                .andDo(print()).andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> assertInstanceOf(NotFoundException.class,
+                        result.getResolvedException()))
+                .andExpect(jsonPath("$.message").value(expectedErrorMessage));
+    }
 
-        @Test
-        public void getPromoTest_isEmptyPromo_throwsNotFound() throws Exception {
-                // arrange
-            User userNoPromo = CustomFactory.getUserWithUserName("NoPromotionUser");
-            userRepository.add(userNoPromo);
-                // act & assert
-                mockMvc.perform(get("/products/promo-post/list").param("user_id", String.valueOf(userNoPromo.getUserId())))
-                                .andDo(print()).andExpect(status().isNotFound())
-                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(result -> assertInstanceOf(NotFoundException.class,
-                                                result.getResolvedException()))
-                                .andExpect(jsonPath("$.message").value("No hay Productos en promoción"));
-        }
+    @Test
+    public void getPromoTest_isEmptyPromo_throwsNotFound() throws Exception {
+            // arrange
+        User userNoPromo = CustomFactory.getUserWithUserName("NoPromotionUser");
+        userRepository.add(userNoPromo);
+        // act & assert
+        mockMvc.perform(get("/products/promo-post/list").param("user_id", String.valueOf(userNoPromo.getUserId())))
+                .andDo(print()).andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> assertInstanceOf(NotFoundException.class,
+                        result.getResolvedException()))
+                .andExpect(jsonPath("$.message").value("No hay Productos en promoción"));
+    }
 
-        @Test
-        public void getPostListWithFiltersTest_validFilters_returnFilteredList() throws Exception {
-                // arrange
-                String discount = "0.15";
-                String category = "100";
-                String color = "Black";
-                String has_promo = "true";
-                Post payLoad = CustomFactory.createPromoPost();
-                user.setPosts(List.of(payLoad));
-                String expectedResponse = CustomFactory.promoListWithFiltersResponse();
+    @Test
+    public void getPostListWithFiltersTest_validFilters_returnFilteredList() throws Exception {
+        // arrange
+        String discount = "0.15";
+        String category = "100";
+        String color = "Black";
+        String has_promo = "true";
+        Post payLoad = CustomFactory.createPromoPost();
+        user.setPosts(List.of(payLoad));
+        String expectedResponse = CustomFactory.promoListWithFiltersResponse();
 
-                // act & assert
-                
+        // act & assert
+        MvcResult result = this.mockMvc.perform(get("/products/post/list").param("discount", discount)
+                        .param("category", category).param("color", color).param("hasPromo", has_promo))
+                .andDo(print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+        Assertions.assertEquals(expectedResponse, result.getResponse().getContentAsString());
+    }
 
-                MvcResult result = this.mockMvc.perform(get("/products/post/list").param("discount", discount)
-                                .param("category", category).param("color", color).param("hasPromo", has_promo))
-                                .andDo(print())
-                                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andReturn();
-                Assertions.assertEquals(expectedResponse, result.getResponse().getContentAsString());
-        }
+    @Test
+    public void getPostList_NotFoundPromoWithFilters_returnNotFoundException() throws Exception {
+        // arrange
+        String discount = "0.155";
+        String category = "10034";
+        String color = "Blacksss";
+        String has_promo = "false";
+        String expectedMessageResult = "No se encontraron publicaciones con el filtro proporcionado.";
 
-        @Test
-        public void getPostList_NotFoundPromoWithFilters_returnNotFoundException() throws Exception {
-                // arrange
-                String discount = "0.155";
-                String category = "10034";
-                String color = "Blacksss";
-                String has_promo = "false";
-                String expectedMessageResult = "No se encontraron publicaciones con el filtro proporcionado.";
+        // act & assert
+        this.mockMvc.perform(get("/products/post/list").param("discount", discount)
+                        .param("category", category).param("color", color).param("hasPromo", has_promo))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> assertInstanceOf(NotFoundException.class,
+                        result.getResolvedException()))
+                .andExpect(jsonPath("$.message").value(expectedMessageResult));
+    }
 
-                // act & assert
-                this.mockMvc.perform(get("/products/post/list").param("discount", discount)
-                                .param("category", category).param("color", color).param("hasPromo", has_promo))
-                                .andDo(print())
-                                .andExpect(status().isNotFound())
-                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(result -> assertInstanceOf(NotFoundException.class,
-                                                result.getResolvedException()))
-                                .andExpect(jsonPath("$.message").value(expectedMessageResult));
+    @Test
+    public void getPostListTest_discountInvalid_returnBadRequestException() throws Exception {
+        String discount = "-3";
+        String expectedResultMessage = "El valor del descuento no es válido";
 
-        }
-
-        @Test
-        public void getPostListTest_discountInvalid_returnBadRequestException() throws Exception {
-                String discount = "-3";
-                String expectedResultMessage = "El valor del descuento no es válido";
-
-                // act & assert
-                this.mockMvc.perform(get("/products/post/list").param("discount", discount))
-                                .andDo(print()).andExpect(status().isBadRequest())
-                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(result -> assertInstanceOf(BadRequestException.class,
-                                                result.getResolvedException()))
-                                .andExpect(jsonPath("$.message").value(expectedResultMessage));
-        }
+        // act & assert
+        this.mockMvc.perform(get("/products/post/list").param("discount", discount))
+                .andDo(print()).andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(result -> assertInstanceOf(BadRequestException.class,
+                        result.getResolvedException()))
+                .andExpect(jsonPath("$.message").value(expectedResultMessage));
+    }
 
     @Test
     @DisplayName("T-0012 - US-0006: obtiene los post de los seguidos por el usuario ")
