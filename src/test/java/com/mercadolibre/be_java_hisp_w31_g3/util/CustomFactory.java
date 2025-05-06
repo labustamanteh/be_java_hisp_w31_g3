@@ -84,16 +84,17 @@ public final class CustomFactory {
     }
 
 
-    public static String createPromoPost() throws JsonProcessingException {
+    public static Post createPromoPost() throws JsonProcessingException {
 
-        return generateFromDto(PostDto.builder().userId(2L)
-                .date("01-04-2025")
-                .product(new ProductDto(5L, "Silla", "Household",
+        return Post.builder().userId(2L)
+                .postId(1L)
+                .date(LocalDate.of(2025, 4, 1))
+                .product(new Product(5L, "Silla", "Household",
                         "Racer", "Black", "Special Edition"))
                 .categoryId(100L)
                 .price(700.00)
                 .hasPromo(true)
-                .discount(0.15).build());
+                .discount(0.15).build();
     }
 
     public static String promoListResponse() throws JsonProcessingException {

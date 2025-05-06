@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,7 @@ public class UserServiceTest {
     private final User user2 = new User();
     private final long userId1 = user1.getUserId();
     private final long userId2 = user2.getUserId();
+    private final List<User> userList = List.of(user1, user2);
 
     private void mockUsersExistInRepo() {
         when(userRepository.getById(userId1)).thenReturn(Optional.of(user1));
@@ -225,6 +227,31 @@ public class UserServiceTest {
 
         // Act & Assert
         assertThrows(NotFoundException.class, () -> userService.getFollowedList(4L, "name_ascs"));
+    }
+
+    @Test
+    void getUsers_UsersExist_ReturnsListOfUserDtos() {
+        // Arrange
+        when(userRepository.getAll()).thenReturn(userList);
+
+        // Act
+        List<UserDto> result = userService.getUsers();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(userList.size(), result.size());
+        verify(userRepository).getAll();
+    }
+
+    @Test
+    void getUsers_NoUsers_ThrowsNotFoundException() {
+        // Arrange
+        when(userRepository.getAll()).thenReturn(Collections.emptyList());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getUsers());
+        assertEquals("No hay usuarios para mostrar", exception.getMessage());
+        verify(userRepository).getAll();
     }
 
 }
